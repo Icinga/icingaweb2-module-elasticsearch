@@ -9,9 +9,19 @@ $severities = array(
     6 => 'informational',
     7 => 'debug',
 );
+
+function programLinks($text, $view) {
+    if (preg_match('/^([a-zA-Z0-9]+)/', $text, $m)) {
+        $program = $m[1];
+        $programLink = $view->qlink($program, $view->url()->with('program', strtolower($program)));
+        return preg_replace('/^' . preg_quote($program, '/') . '/', $programLink, $text);
+    }
+    return $text;
+}
 ?>
 <?php if (! $this->compact): ?>
 <div class="controls">
+<?= $this->tabs ?>
 <h3>Syslog<?php if ($this->host) : ?>
 : <?= $this->escape($this->host) ?>
 <?php endif ?></h3>
@@ -53,10 +63,14 @@ Message: <input type="text" name="message" value="<?= $this->escape($this->messa
 <table class="action">
 <?php foreach ($this->result->hits->hits as $row): ?>
 <tr class="state">
-  <td class="state <?= $row->_source->syslog_severity ?>"><?= strtoupper(substr($row->_source->syslog_severity, 0, 6)) ?><br /><?= $this->timeSince(strtotime(
+  <td class="state <?= $row->_source->syslog_severity ?>" data-base-target="_next"><a href="<?= $this->url('logstash/show/enry', array(
+  '_index' => $row->_index,
+  '_id' => $row->_id,
+
+)) ?>"><?= strtoupper(substr($row->_source->syslog_severity, 0, 6)) ?><br /><?= $this->timeSince(strtotime(
   
   isset($row->_source->timestamp) ? $row->_source->timestamp : $row->_source->{'@timestamp'}
-   ))  ?></td>
+   ))  ?></a></td>
    <?php if (! $this->host || $this->compact): ?>
   <td style="width: 10em;">
   <?php if (isset($row->_source->hostname)): ?>
@@ -67,7 +81,7 @@ Message: <input type="text" name="message" value="<?= $this->escape($this->messa
   </td>
   <?php endif ?>
   <td><?php if (isset($row->_source->program)): ?>
-  <?= $this->escape($row->_source->program) ?><?php if (isset($row->_source->pid)):
+  <?= programLinks($row->_source->program, $this) ?><?php if (isset($row->_source->pid)):
    ?>[<?= $this->escape($row->_source->pid) ?>]<?php endif ?>: 
   <?php endif ?>
   <?php if (is_array($row->_source->message)): ?>
