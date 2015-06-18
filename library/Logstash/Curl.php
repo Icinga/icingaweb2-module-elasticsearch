@@ -102,8 +102,8 @@ class Curl {
 
         if ($status !== 200) {
             $short_result = $result;
-            if (strlen($short_result) > 50)
-                $short_result = substr($short_result, 0, 47)."...";
+            if (strlen($short_result) > 1000)
+                $short_result = substr($short_result, 0, 997)."...";
 
             throw new Exception(
                 sprintf(
