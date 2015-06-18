@@ -11,7 +11,7 @@ class HostActions extends HostActionsHook
     public function getActionsForHost(Host $host)
     {
         return array(
-            'Syslog' => Url::fromPath('logstash/test/search', array('host' => $host->host_name))
+            'Syslog' => Url::fromPath('logstash/event/search', array('host' => $host->host_name))
         );
     }
 }

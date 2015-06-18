@@ -1,0 +1,86 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+    <?= $this->limiter; ?>
+    <?= $this->paginator; ?>
+</div>
+<?php endif ?>
+    <?php /* TODO: move - if (! $this->base_url): ?>
+    There is no valid config in <?= $this->escape($this->configFile) ?>. You need at least a hostname definition:
+    <pre>
+    [elk]
+    hostname = elk.example.com
+    </pre>
+
+    A full blown configuration could look like this:
+    <pre>
+    [elk]
+    hostname      = elk.example.com
+    port          = 9200
+    protocol      = http
+    index_pattern = "logstash-*"
+    </pre>
+    </div>
+    <?php return; endif */ ?>
+<div class="filter">
+    <form action="<?= $this->url()->without('query')->without('filter')->without('fields') ?>" class="inline" method="get">
+        <label for="query">Query:</label><input type="text" name="query" value="<?= $this->escape($this->query) ?>" /><br/>
+        <label for="filter">Filter:</label><input type="text" name="filter" value="<?= $this->escape($this->filter) ?>" /><br/>
+        <label for="fields">Fields:</label><input type="text" name="fields" value="<?= $this->escape($this->fields) ?>" /><br/>
+        <label for="size"></label>
+        <input type="submit" value="Search" name="" style="width: 5em" />
+    </form>
+
+    <?php if ($this->live): ?>
+    <?= $this->qlink('Refresh slow', $this->url()->without('live')) ?>
+    <?php else: ?>
+    <?= $this->qlink('Refresh fast', $this->url()->setParam('live', true)) ?>
+    <?php endif ?>
+</div>
+<div class="content">
+
+    <?php if (!$this->search): ?>
+        <p>No results found!</p>
+    <?php else: ?>
+
+    <p class="small">Found <?= $this->search->total ?> hits in <?= $this->search->took ?>ms</p>
+
+    <table class="documents" data-base-target="_next">
+    <?php if ($this->search->total > 0): ?>
+        <?php if (count($this->fieldlist) > 0): ?>
+        <tr class="header">
+            <?php foreach($this->fieldlist as $field): ?>
+            <th><?= $this->escape($field) ?></th>
+            <?php endforeach ?>
+        </tr>
+        <?php endif; ?>
+        <?php foreach ($this->search->hits as $row):
+            $num = 0;
+            $href = $this->url("logstash/show/".$row->_id);
+        ?>
+            <tr class="document" data-elastic-id="<?= $row->_id ?>"
+                href="<?= $href ?>">
+                <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
+                    <td><?php $value = (property_exists($row->_source, $field) ? $row->_source->$field : '');
+                        if ($num++ == 0): ?>
+                        <a href="<?= $href ?>"><?= $value ?></a>
+                        <?php else: echo $value; endif ?>
+                    </td>
+                <?php endforeach ?>
+
+                <?php if (count($this->fieldlist) == 0): ?>
+                    <td class="rawjson"><pre><?= json_encode($row->_source, JSON_PRETTY_PRINT); ?></pre></td>
+                <?php endif ?>
+            </tr>
+            <?php /* TODO: feature?
+            <tr class="document-detail">
+                <td colspan="<?= count($this->fieldlist) ?>">
+                    event
+                </td>
+            </tr>
+            */ ?>
+        <?php endforeach ?>
+        <?php endif ?>
+    </table>
+    <?php endif ?>
+</div>
