@@ -13,8 +13,9 @@ It is planned to have the following features:
 
 This module was created as part of my consulting work with [NETWAYS](http://www.netways.de).
 
-    Copyright (c) 2015 Markus Frosch <markus@lazyfrosch.de>
-                  2015 NETWAYS GmbH <info@netways.de>
+    Copyright (c) 2015 NETWAYS GmbH <info@netways.de>
+                  2015 Thomas Gelf <thomas.gelf@netways.de>
+                  2015 Markus Frosch <markus@lazyfrosch.de>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
