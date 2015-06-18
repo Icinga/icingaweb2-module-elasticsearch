@@ -1,5 +1,8 @@
 <?php
 
-$this->menuSection(mt('monitoring', 'History'))
-    ->add('Logstash')->setUrl('logstash/event/search');
+$this->menuSection('Logstash')
+    ->setIcon('doc-text')
+    ->add(t('Event search'))
+        ->setIcon('search')
+        ->setUrl('logstash/event/search');
 
