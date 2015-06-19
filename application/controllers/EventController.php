@@ -19,6 +19,10 @@ class Logstash_EventController extends ModuleActionController
         ));
     }
 
+    public function indexAction() {
+        $this->redirectNow('logstash/event/search');
+    }
+
     public function searchAction()
     {
         $this->view->compact = $this->_getParam('view') === 'compact';

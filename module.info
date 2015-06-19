@@ -1,0 +1,4 @@
+Module: logstash
+Version: 0.0.1-test
+Description: Logstash Event Integration
+ Still in early testing...
