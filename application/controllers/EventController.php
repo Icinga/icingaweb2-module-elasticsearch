@@ -45,7 +45,7 @@ class Logstash_EventController extends Controller
             $this->view->detaillist = count($split) > 1 ? preg_split('/\s*[,]\s*/', $split[1]) : [];
         }
 
-        $search = new Search($this->elasticsearch_url);
+        $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
         if ($this->view->query) {
             $search->setQueryString($this->view->query);
 
@@ -62,11 +62,6 @@ class Logstash_EventController extends Controller
             $this->view->paginator = new Paginator();
             $this->view->paginator->setQuery($search);
 
-            // sort_field
-            // sort_dir
-
-            // from
-            // size
             $search->search();
 
             $this->view->search = $search;

@@ -8,12 +8,11 @@ use Exception;
 class Controller extends IcingaWebController
 {
     protected $elasticsearch_url;
+    protected $index_pattern;
 
     public function moduleInit() {
         $this->elasticsearch_url = $this->Config()->get('elasticsearch', 'url');
-        if ($index_pattern = $this->Config()->get('elasticsearch', 'index_pattern', null)) {
-            $this->elasticsearch_url .= "/".$index_pattern;
-        }
+        $this->index_pattern = $this->Config()->get('elasticsearch', 'index_pattern', null);
 
         if (!$this->elasticsearch_url) {
             $this->view->configFile = $this->Config()->getConfigFile();
