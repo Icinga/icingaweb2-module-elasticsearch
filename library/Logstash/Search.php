@@ -12,10 +12,8 @@ use Icinga\Data\DataArray\ArrayDatasource;
 
 use Icinga\Module\Logstash\Curl;
 
-class Search implements QueryInterface
+class Search extends ElasticsearchBackend implements QueryInterface
 {
-    protected $curl;
-
     protected $query;
     protected $filter = array();
     protected $filter_query;
@@ -29,15 +27,6 @@ class Search implements QueryInterface
     public $hits;
     public $total;
     public $timed_out;
-
-    public function __construct($elasticsearch=null)
-    {
-        $this->curl = new Curl();
-
-        if ($elasticsearch) {
-            $this->curl->setBaseURL($elasticsearch);
-        }
-    }
 
     public function search()
     {
@@ -144,23 +133,6 @@ class Search implements QueryInterface
             )
         ));
     }
-
-    /**
-     * @return String url
-     */
-    public function getElasticsearch()
-    {
-        return $this->curl->getBaseURL();
-    }
-
-    /**
-     * @param String $elasticsearch - Elasticsearch URL
-     */
-    public function setElasticsearch($elasticsearch)
-    {
-        $this->curl->setBaseURL($elasticsearch);
-    }
-
 
     /**
      * Retrieve an array containing all rows of the result set
