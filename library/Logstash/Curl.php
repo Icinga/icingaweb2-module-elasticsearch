@@ -48,7 +48,7 @@ class Curl {
     }
 
     public function get_json($url) {
-        return json_decode($this->get($url), undef, null, $this->json_header);
+        return json_decode($this->get($url, 'GET', null, $this->json_header));
     }
 
     public function post($url, $data)
