@@ -6,34 +6,6 @@
   font-size: 0.8em;
 }
 
-.state.debug {
-    background-color: gray;
-}
-
-.state.informational {
-    background-color: blue;
-}
-
-.state.notice {
-    background-color: lightblue;
-}
-
-.state.warning {
-    background-color: @colorWarning;
-}
-
-.state.error {
-    background-color: @colorCriticalHandled;
-}
-
-.state.critical {
-    background-color: @colorCritical;
-}
-
-.state.alert {
-    background-color: red;
-}
-
 label {
   width: 4em;
 }
@@ -52,8 +24,17 @@ table.documents {
   tr {
     border-bottom: 2px solid transparent;
   }
-  tr > td:first-child {
-    border-left: 0.5em solid grey;
+  tr.state > td:first-child {
+    border-left: 0.5em solid lightgrey;
+  }
+  tr.warning > td:first-child {
+    border-color: @colorWarning;
+  }
+  tr.critical > td:first-child {
+    border-color: @colorCritical;
+  }
+  tr.state a {
+    font-weight: normal;
   }
 
   td {

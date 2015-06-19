@@ -10,6 +10,8 @@
         <label for="query">Query:</label><input type="text" name="query" value="<?= $this->escape($this->query) ?>" /><br/>
         <label for="filter">Filter:</label><input type="text" name="filter" value="<?= $this->escape($this->filter) ?>" /><br/>
         <label for="fields">Fields:</label><input type="text" name="fields" value="<?= $this->escape($this->fields) ?>" /><br/>
+        <label for="warning">Warning:</label><input type="text" name="warning" value="<?= $this->escape($this->warning) ?>" /><br/>
+        <label for="critical">Critical:</label><input type="text" name="critical" value="<?= $this->escape($this->critical) ?>" /><br/>
         <label for="size"></label>
         <input type="submit" value="Search" name="" style="width: 5em" />
     </form>
@@ -38,18 +40,21 @@
         </tr>
         <?php endif; ?>
         <?php foreach ($this->hits as $hit):
+            $state_class = $hit['icinga_status'] == 2 ? 'critical' :
+                ($hit['icinga_status'] == 1 ? 'warning' : '');
             $num = 0;
             $href = $this->url("logstash/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
         ?>
-            <tr class="document" data-elastic-id="<?= $hit['_id'] ?>"
+            <tr class="document state <?= $state_class ?>"
+                data-elastic-index="<?= $hit['_index'] ?>"
+                data-elastic-type="<?= $hit['_type'] ?>"
+                data-elastic-id="<?= $hit['_id'] ?>"
                 href="<?= $href ?>">
                 <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
                     <td><?php $value = (array_key_exists($field, $hit) ? $hit[$field] : '');
                         $value = $this->escape($value);
-                        if ($num++ == 0): ?>
-                        <a href="<?= $href ?>"><?= $value ?></a>
-                        <?php else: echo $value; endif ?>
-                    </td>
+                        if ($num++ == 0): ?><a href="<?= $href ?>"><?= $value ?></a><?php
+                        else: echo $value; endif ?></td>
                 <?php endforeach ?>
 
                 <?php if (count($this->fieldlist) == 0): ?>

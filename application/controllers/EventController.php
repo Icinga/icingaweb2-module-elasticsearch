@@ -40,6 +40,16 @@ class Logstash_EventController extends Controller
         }
 
         $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
+
+        $this->view->warning = $this->_getParam('warning');
+        if ($this->view->warning) {
+            $search->parseIcingaQueryString('warning', $this->view->warning);
+        }
+        $this->view->critical = $this->_getParam('critical');
+        if ($this->view->critical) {
+            $search->parseIcingaQueryString('critical', $this->view->critical);
+        }
+
         if ($this->view->query) {
             $search->setQueryString($this->view->query);
 

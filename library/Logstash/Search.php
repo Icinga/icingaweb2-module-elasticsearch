@@ -14,6 +14,8 @@ use Icinga\Module\Logstash\Curl;
 
 class Search extends ElasticsearchBackend implements QueryInterface
 {
+    use IcingaStatus;
+
     protected $query;
     protected $filter = array();
     protected $filter_query;
@@ -53,13 +55,13 @@ class Search extends ElasticsearchBackend implements QueryInterface
         }
 
         if (count($this->fields) > 0) {
-            $post['fields'] = array_merge(
-                array(
-                    'test'
-                ),
-                $this->fields
-            );
+            $fields = $this->fields;
+            if (count($this->icinga_status_fields) > 0) {
+                $fields = array_merge($fields, $this->icinga_status_fields);
+            }
+            $post['fields'] = array_unique($fields);
         }
+
 
         if ($this->size)
             $post['size'] = $this->size;
@@ -163,10 +165,12 @@ class Search extends ElasticsearchBackend implements QueryInterface
                 foreach ($hit->fields as $key => $value) {
                     $h[$key] = $value[0];
                 }
-            else
+            elseif (property_exists($hit, '_source'))
                 foreach ($hit->_source as $key => $value) {
                     $h[$key] = $value;
                 }
+
+            $this->evalIcingaStatus($h);
 
             $hits[] = $h;
         }
