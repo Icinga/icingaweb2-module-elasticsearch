@@ -5,23 +5,6 @@
     <?= $this->paginator; ?>
 </div>
 <?php endif ?>
-    <?php /* TODO: move - if (! $this->base_url): ?>
-    There is no valid config in <?= $this->escape($this->configFile) ?>. You need at least a hostname definition:
-    <pre>
-    [elk]
-    hostname = elk.example.com
-    </pre>
-
-    A full blown configuration could look like this:
-    <pre>
-    [elk]
-    hostname      = elk.example.com
-    port          = 9200
-    protocol      = http
-    index_pattern = "logstash-*"
-    </pre>
-    </div>
-    <?php return; endif */ ?>
 <div class="filter">
     <form action="<?= $this->url()->without('query')->without('filter')->without('fields') ?>" class="inline" method="get">
         <label for="query">Query:</label><input type="text" name="query" value="<?= $this->escape($this->query) ?>" /><br/>

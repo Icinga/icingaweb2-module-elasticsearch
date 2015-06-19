@@ -1,12 +1,12 @@
 <?php
 
 use Icinga\Module\Logstash\Search;
-use Icinga\Web\Controller\ModuleActionController;
+use Icinga\Module\Logstash\Controller;
 
 use Icinga\Web\Widget\Limiter;
 use Icinga\Web\Widget\Paginator;
 
-class Logstash_EventController extends ModuleActionController
+class Logstash_EventController extends Controller
 {
     public function init()
     {
@@ -45,21 +45,7 @@ class Logstash_EventController extends ModuleActionController
             $this->view->detaillist = count($split) > 1 ? preg_split('/\s*[,]\s*/', $split[1]) : [];
         }
 
-        $this->view->configFile = $this->Config()->getConfigFile();
-        $hostname = $this->Config()->get('elk', 'hostname');
-        $protocol = $this->Config()->get('elk', 'protocol', 'http');
-        $port = (int) $this->Config()->get('elk', 'port', 9200);
-        $index_pattern = $this->Config()->get('elk', 'index_pattern', 'logstash-*');
-
-        $url = sprintf(
-            '%s://%s:%d/%s/',
-            $protocol,
-            $hostname,
-            $port,
-            $index_pattern
-        );
-
-        $search = new Search($url);
+        $search = new Search($this->elasticsearch_url);
         if ($this->view->query) {
             $search->setQueryString($this->view->query);
 
@@ -85,6 +71,5 @@ class Logstash_EventController extends ModuleActionController
 
             $this->view->search = $search;
         }
-        $this->view->base_url = $url;
     }
 }

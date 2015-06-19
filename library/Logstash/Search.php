@@ -25,9 +25,6 @@ class Search implements QueryInterface
     protected $size;
     protected $from;
 
-
-    protected $elasticsearch;
-
     public $took;
     public $hits;
     public $total;
@@ -38,13 +35,16 @@ class Search implements QueryInterface
         $this->curl = new Curl();
 
         if ($elasticsearch) {
-            $this->elasticsearch = $elasticsearch;
             $this->curl->setBaseURL($elasticsearch);
         }
     }
 
     public function search()
     {
+        if (!$this->getElasticsearch()) {
+            throw new Exception("Elasticsearch URL has not be configured!");
+        }
+
         $post = array(
             'query' => $this->query
         );
@@ -150,7 +150,7 @@ class Search implements QueryInterface
      */
     public function getElasticsearch()
     {
-        return $this->elasticsearch;
+        return $this->curl->getBaseURL();
     }
 
     /**
@@ -158,7 +158,6 @@ class Search implements QueryInterface
      */
     public function setElasticsearch($elasticsearch)
     {
-        $this->elasticsearch = $elasticsearch;
         $this->curl->setBaseURL($elasticsearch);
     }
 
