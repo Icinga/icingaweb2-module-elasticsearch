@@ -35,9 +35,7 @@ class Logstash_EventController extends Controller
         $this->view->fields = $this->_getParam('fields');
         $this->view->fieldlist = array();
         if ($this->view->fields) {
-            $split = preg_split('/\s*;\s*/', $this->view->fields, 2);
-            $this->view->fieldlist = preg_split('/\s*[,]\s*/', $split[0]);
-            $this->view->detaillist = count($split) > 1 ? preg_split('/\s*[,]\s*/', $split[1]) : [];
+            $this->view->fieldlist = preg_split('/\s*[,]\s*/', $this->view->fields);
         }
 
         $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
