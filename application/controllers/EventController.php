@@ -32,15 +32,19 @@ class Logstash_EventController extends Controller
         $this->view->query = $this->_getParam('query');
         $this->view->filter = $this->_getParam('filter');
 
+        $fields = null;
         $this->view->fields = $this->_getParam('fields');
         $this->view->fieldlist = array();
         if ($this->view->fields) {
-            $this->view->fieldlist = preg_split('/\s*[,]\s*/', $this->view->fields);
+            $this->view->fieldlist = $fields = preg_split('/\s*[,]\s*/', $this->view->fields);
         }
 
         $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
         if ($this->view->query) {
             $search->setQueryString($this->view->query);
+
+            if (isset($fields))
+                $search->setFields($fields);
 
             if ($this->view->filter)
                 $search->setFilterQueryString($this->view->filter);
@@ -55,9 +59,9 @@ class Logstash_EventController extends Controller
             $this->view->paginator = new Paginator();
             $this->view->paginator->setQuery($search);
 
-            $search->search();
-
-            $this->view->search = $search;
+            $this->view->hits = $search->fetchAll();
+            $this->view->count = $search->count();
+            $this->view->took = $search->getTook();
         }
     }
 

@@ -17,18 +17,19 @@ class Search extends ElasticsearchBackend implements QueryInterface
     protected $query;
     protected $filter = array();
     protected $filter_query;
+    protected $fields = array();
 
     protected $sort_field;
     protected $sort_direction;
     protected $size;
     protected $from;
 
-    public $took;
-    public $hits;
-    public $total;
-    public $timed_out;
+    protected $took;
+    protected $hits;
+    protected $total;
+    protected $timed_out;
 
-    public function search()
+    protected function search()
     {
         if (!$this->getElasticsearch()) {
             throw new Exception("Elasticsearch URL has not be configured!");
@@ -48,6 +49,15 @@ class Search extends ElasticsearchBackend implements QueryInterface
                 $this->sort_field => array(
                     'order' => $this->sort_direction ? $this->sort_direction : 'desc'
                 )
+            );
+        }
+
+        if (count($this->fields) > 0) {
+            $post['fields'] = array_merge(
+                array(
+                    'test'
+                ),
+                $this->fields
             );
         }
 
@@ -141,7 +151,26 @@ class Search extends ElasticsearchBackend implements QueryInterface
      */
     public function fetchAll()
     {
-        // TODO: Implement fetchAll() method.
+        $this->search();
+        $hits = array();
+        foreach ($this->hits as $hit) {
+            $h = array(
+                '_index' => $hit->_index,
+                '_type' => $hit->_type,
+                '_id' => $hit->_id,
+            );
+            if (property_exists($hit, 'fields'))
+                foreach ($hit->fields as $key => $value) {
+                    $h[$key] = $value[0];
+                }
+            else
+                foreach ($hit->_source as $key => $value) {
+                    $h[$key] = $value;
+                }
+
+            $hits[] = $h;
+        }
+        return $hits;
     }
 
     /**
@@ -317,5 +346,29 @@ class Search extends ElasticsearchBackend implements QueryInterface
     public function addFilter(Filter $filter)
     {
         // TODO: Implement addFilter() method.
+    }
+
+    /**
+     * @return array
+     */
+    public function getFields()
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @param array $fields
+     */
+    public function setFields($fields)
+    {
+        $this->fields = $fields;
+    }
+
+    /**
+     * @return Integer milliseconds
+     */
+    public function getTook()
+    {
+        return $this->took;
     }
 }

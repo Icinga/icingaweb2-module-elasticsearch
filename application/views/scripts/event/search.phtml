@@ -22,14 +22,14 @@
 </div>
 <div class="content">
 
-    <?php if (!$this->search): ?>
+    <?php if ($this->count == 0): ?>
         <p>No results found!</p>
     <?php else: ?>
 
-    <p class="small">Found <?= $this->search->total ?> hits in <?= $this->search->took ?>ms</p>
+    <p class="small">Found <?= $this->count ?> hits in <?= $this->took ?>ms</p>
 
     <table class="documents" data-base-target="_next">
-    <?php if ($this->search->total > 0): ?>
+    <?php if ($this->count > 0): ?>
         <?php if (count($this->fieldlist) > 0): ?>
         <tr class="header">
             <?php foreach($this->fieldlist as $field): ?>
@@ -37,14 +37,15 @@
             <?php endforeach ?>
         </tr>
         <?php endif; ?>
-        <?php foreach ($this->search->hits as $row):
+        <?php foreach ($this->hits as $hit):
             $num = 0;
-            $href = $this->url("logstash/event/show", array('index' => $row->_index, 'type' => $row->_type, 'id' => $row->_id));
+            $href = $this->url("logstash/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
         ?>
-            <tr class="document" data-elastic-id="<?= $row->_id ?>"
+            <tr class="document" data-elastic-id="<?= $hit['_id'] ?>"
                 href="<?= $href ?>">
                 <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
-                    <td><?php $value = (property_exists($row->_source, $field) ? $row->_source->$field : '');
+                    <td><?php $value = (array_key_exists($field, $hit) ? $hit[$field] : '');
+                        $value = $this->escape($value);
                         if ($num++ == 0): ?>
                         <a href="<?= $href ?>"><?= $value ?></a>
                         <?php else: echo $value; endif ?>
@@ -52,7 +53,7 @@
                 <?php endforeach ?>
 
                 <?php if (count($this->fieldlist) == 0): ?>
-                    <td class="rawjson"><pre><?= json_encode($row->_source, JSON_PRETTY_PRINT); ?></pre></td>
+                    <td class="rawjson"><pre><?= json_encode($hit, JSON_PRETTY_PRINT); ?></pre></td>
                 <?php endif ?>
             </tr>
         <?php endforeach ?>
