@@ -39,7 +39,7 @@
         <?php endif; ?>
         <?php foreach ($this->search->hits as $row):
             $num = 0;
-            $href = $this->url("logstash/show/".$row->_id);
+            $href = $this->url("logstash/event/show", array('index' => $row->_index, 'type' => $row->_type, 'id' => $row->_id));
         ?>
             <tr class="document" data-elastic-id="<?= $row->_id ?>"
                 href="<?= $href ?>">
@@ -55,13 +55,6 @@
                     <td class="rawjson"><pre><?= json_encode($row->_source, JSON_PRETTY_PRINT); ?></pre></td>
                 <?php endif ?>
             </tr>
-            <?php /* TODO: feature?
-            <tr class="document-detail">
-                <td colspan="<?= count($this->fieldlist) ?>">
-                    event
-                </td>
-            </tr>
-            */ ?>
         <?php endforeach ?>
         <?php endif ?>
     </table>

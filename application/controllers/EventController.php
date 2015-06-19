@@ -1,30 +1,25 @@
 <?php
 
-use Icinga\Module\Logstash\Search;
 use Icinga\Module\Logstash\Controller;
+use Icinga\Module\Logstash\Search;
+use Icinga\Module\Logstash\Event;
 
 use Icinga\Web\Widget\Limiter;
 use Icinga\Web\Widget\Paginator;
 
 class Logstash_EventController extends Controller
 {
-    public function init()
-    {
-        parent::init();
-        $tabs = $this->getTabs();
-
-        $tabs->add('Events', array(
-            'title' => $this->translate('Events'),
-            'url'   => 'logstash/event/search'
-        ));
-    }
-
     public function indexAction() {
         $this->redirectNow('logstash/event/search');
     }
 
     public function searchAction()
     {
+        $this->getTabs()->add('search', array(
+            'title' => $this->translate('Events'),
+            'url'   => $this->view->url()
+        ))->activate(('search'));;
+
         $this->view->compact = $this->_getParam('view') === 'compact';
 
         $this->view->live = $this->params->shift('live');
@@ -66,5 +61,25 @@ class Logstash_EventController extends Controller
 
             $this->view->search = $search;
         }
+    }
+
+    public function showAction() {
+
+        $index = $this->_getParam('index');
+        $type = $this->_getParam('type');
+        $id = $this->_getParam('id');
+
+        $this->getTabs()->add('show', array(
+            'title' => $this->translate('Event detail'),
+            'url'   => $this->view->url()
+        ))->activate(('show'));
+
+        $event = new Event($this->elasticsearch_url);
+
+        $event->setIndex($index);
+        $event->setType($type);
+        $event->setId($id);
+
+        $this->view->event = $event->fetch();
     }
 }

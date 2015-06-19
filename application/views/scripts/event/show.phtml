@@ -1,0 +1,49 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<?php endif ?>
+<div class="content">
+
+    <?php if (!$this->event->found()): ?>
+        <p>Document not found!</p>
+    <?php else: ?>
+
+        <table class="event_detail">
+            <tr>
+                <th>Index</th>
+                <td><?= $this->escape($this->event->getIndex()) ?></td>
+            </tr>
+            <tr>
+                <th>Type</th>
+                <td><?= $this->escape($this->event->getType()) ?></td>
+            </tr>
+            <tr>
+                <th>ID</th>
+                <td><?= $this->escape($this->event->getId()) ?></td>
+            </tr>
+            <tr>
+                <td colspan="2">&nbsp;</td>
+            </tr>
+            <?php foreach($this->event->getSource() as $key => $value):
+                if (substr($key, 0, 1) == '@' or $key == 'type') continue;
+            ?>
+            <tr>
+                <th><?= $this->escape($key) ?></th>
+                <td><?php
+                    if (is_array($value)) {
+                        echo $this->escape(implode(', ', $value));
+                    }
+                    elseif (is_object($value)) {
+                        echo '<pre>'.$this->escape(json_encode($value, JSON_PRETTY_PRINT)).'</pre>';
+                    }
+                    else {
+                        echo $this->escape((String) $value);
+                    }
+                ?></td>
+            </tr>
+            <?php endforeach ?>
+        </table>
+
+    <?php endif ?>
+</div>
