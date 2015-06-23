@@ -8,7 +8,6 @@ use Icinga\Data\Sortable;
 use Icinga\Data\QueryInterface;
 use Icinga\Exception\ProgrammingError;
 use Exception;
-use Icinga\Data\DataArray\ArrayDatasource;
 
 use Icinga\Module\Logstash\Curl;
 
@@ -68,6 +67,7 @@ class Search extends ElasticsearchBackend implements QueryInterface
             );
         }
 
+        /*
         if (count($this->fields) > 0) {
             $fields = $this->fields;
             if (count($this->icinga_status_fields) > 0) {
@@ -75,7 +75,7 @@ class Search extends ElasticsearchBackend implements QueryInterface
             }
             $post['fields'] = array_unique($fields);
         }
-
+        */
 
         if ($this->size)
             $post['size'] = $this->size;

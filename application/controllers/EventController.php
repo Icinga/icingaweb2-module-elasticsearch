@@ -53,8 +53,8 @@ class Logstash_EventController extends Controller
         if ($this->view->query) {
             $search->setQueryString($this->view->query);
 
-            if (isset($fields))
-                $search->setFields($fields);
+            //if (isset($fields))
+            //    $search->setFields($fields);
 
             if ($this->view->filter)
                 $search->setFilterQueryString($this->view->filter);
