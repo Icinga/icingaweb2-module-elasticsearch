@@ -53,9 +53,18 @@ class Search extends ElasticsearchBackend implements QueryInterface
 
         if ($this->sort_field) {
             $post['sort'] = array(
-                $this->sort_field => array(
-                    'order' => $this->sort_direction ? $this->sort_direction : 'desc'
+                array(
+                    $this->sort_field => array(
+                        'order' => $this->sort_direction ? $this->sort_direction : 'desc'
+                    )
+                ),
+                /* TODO: find way for stable sorting
+                array(
+                    '_id' => array(
+                        'order' => 'asc'
+                    )
                 )
+                */
             );
         }
 
