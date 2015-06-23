@@ -12,6 +12,8 @@ class QueryString {
     protected $parsed = false;
     protected $matchedTree = array();
 
+    protected $query_string;
+
     protected function debug($value, $op) {
         $this->debug[] = array(
             'value' => $value,
@@ -137,10 +139,10 @@ class QueryString {
     public function parse($query_string, $default_operator = 'OR') {
         $tree = array();
 
-        $query_string = trim($query_string);
+        $this->query_string = trim($query_string);
 
         // split by parts
-        $parts = preg_split("#([:\s\(\)\"/])#", $query_string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+        $parts = preg_split("#([:\s\(\)\"/])#", $this->query_string, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
 
         $this->tree = $this->parse_parts($parts, $default_operator);
         $this->parsed = true;
@@ -256,6 +258,14 @@ class QueryString {
     public function getMatchedTree()
     {
         return $this->matchedTree;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getQueryString()
+    {
+        return $this->query_string;
     }
 
 }

@@ -21,6 +21,8 @@ class Search extends ElasticsearchBackend implements QueryInterface
     protected $fields = array();
 
     protected $without_ack = false;
+    protected $filtered_by_icinga_queries = false;
+    protected $filter_icinga;
 
     protected $sort_field;
     protected $sort_direction;
@@ -54,6 +56,9 @@ class Search extends ElasticsearchBackend implements QueryInterface
 
         if ($this->without_ack === true)
             $post['filter']['and'][] = $this->buildFilterQueryString('NOT icinga_acknowledge:1');
+
+        if ($this->filter_icinga)
+            $post['filter']['and'][] = $this->filter_icinga;
 
         if ($this->sort_field) {
             $post['sort'] = array(
@@ -150,12 +155,14 @@ class Search extends ElasticsearchBackend implements QueryInterface
         $this->filter = array();
     }
 
-    /* TODO old
-    public function addFilter($object) {
+    /**
+     * add custom Elasticsearch filter -- beware!
+     * @param Array $object
+     */
+    public function addFilterCustom($object) {
         if (!$this->filter) $this->filter = array();
         $this->filter[] = $object;
     }
-    */
 
     public function addFilterTimeRange($from, $to, $field='@timestamp') {
         $this->addFilter(array(
@@ -412,5 +419,40 @@ class Search extends ElasticsearchBackend implements QueryInterface
     public function setWithoutAck($without_ack)
     {
         $this->without_ack = $without_ack;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isFilteredByIcingaQueries()
+    {
+        return $this->filtered_by_icinga_queries;
+    }
+
+    /**
+     * @param boolean $filtered_by_icinga_queries
+     */
+    public function setFilteredByIcingaQueries($filtered_by_icinga_queries)
+    {
+        $this->filtered_by_icinga_queries = $filtered_by_icinga_queries;
+
+        if ($filtered_by_icinga_queries) {
+            $filter = array();
+            if ($qs = $this->getIcingaCriticalQuery()->getQueryString()) {
+                $filter[] = $this->buildFilterQueryString($qs, 'or');
+            }
+            if ($qs = $this->getIcingaCriticalQuery()->getQueryString()) {
+                $filter[] = $this->buildFilterQueryString($qs, 'or');
+            }
+            if (count($filter) == 0)
+                throw new Exception("There are no Icinga queries to be filtered with!");
+
+            $this->filter_icinga = array('or' => $filter);
+        }
+        else {
+            $this->filter_icinga = null;
+        }
+
+
     }
 }

@@ -55,6 +55,22 @@ trait IcingaStatus
     }
 
     /**
+     * @return QueryString
+     */
+    public function getIcingaWarningQuery()
+    {
+        return $this->icinga_warning_query;
+    }
+
+    /**
+     * @return QueryString
+     */
+    public function getIcingaCriticalQuery()
+    {
+        return $this->icinga_critical_query;
+    }
+
+    /**
      * @param Array $document
      */
     protected function evalIcingaStatus(Array &$document)
