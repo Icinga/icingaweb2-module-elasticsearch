@@ -31,6 +31,11 @@ class Search extends ElasticsearchBackend implements QueryInterface
     protected $total;
     protected $timed_out;
 
+    public function __construct($elasticsearch=null) {
+        parent::__construct($elasticsearch);
+        $this->order('@timestamp', 'desc');
+    }
+
     protected function search()
     {
         if (!$this->getElasticsearch()) {
