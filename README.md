@@ -9,6 +9,12 @@ It is planned to have the following features:
 * Integration into service details
 * Search configuration coming from icinga2 service.vars
 
+## Disclaimer
+
+Be WARNED, this module is not yet tested against big Elasticsearch installations, it might cause problems there.
+
+Neither is this module currently supported by anyone, use at your own risk.
+
 ## About
 
 This module was created as part of my consulting work with [NETWAYS](http://www.netways.de).
