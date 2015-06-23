@@ -12,7 +12,7 @@ class Controller extends IcingaWebController
 
     public function moduleInit() {
         $this->elasticsearch_url = $this->Config()->get('elasticsearch', 'url');
-        $this->index_pattern = $this->Config()->get('elasticsearch', 'index_pattern', null);
+        $this->index_pattern = $this->Config()->get('elasticsearch', 'index_pattern', 'logstash-*');
 
         if (!$this->elasticsearch_url) {
             $this->view->configFile = $this->Config()->getConfigFile();
