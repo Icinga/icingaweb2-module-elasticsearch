@@ -51,8 +51,9 @@
                 data-elastic-id="<?= $hit['_id'] ?>"
                 href="<?= $href ?>">
                 <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
-                    <td><?php $value = (array_key_exists($field, $hit) ? $hit[$field] : '');
-                        $value = $this->escape($value);
+                    <td><?php $value = (array_key_exists($field, $hit) ? $hit[$field] : null);
+                        if ($value === null) $value = '&nbsp;';
+                        else $value = $this->escape($value);
                         if ($num++ == 0): ?><a href="<?= $href ?>"><?= $value ?></a><?php
                         else: echo $value; endif ?></td>
                 <?php endforeach ?>
