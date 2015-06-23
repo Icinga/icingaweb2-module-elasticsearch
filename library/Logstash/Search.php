@@ -20,6 +20,8 @@ class Search extends ElasticsearchBackend implements QueryInterface
     protected $filter_query;
     protected $fields = array();
 
+    protected $without_ack = false;
+
     protected $sort_field;
     protected $sort_direction;
     protected $size;
@@ -49,6 +51,9 @@ class Search extends ElasticsearchBackend implements QueryInterface
 
         if ($this->filter_query)
             $post['filter']['and'][] = $this->filter_query;
+
+        if ($this->without_ack === true)
+            $post['filter']['and'][] = $this->buildFilterQueryString('NOT icinga_acknowledge:1');
 
         if ($this->sort_field) {
             $post['sort'] = array(
@@ -116,17 +121,20 @@ class Search extends ElasticsearchBackend implements QueryInterface
         else return false;
     }
 
-    public function setFilterQueryString($query_string, $default_operator='and')
-    {
-        $this->filter_query = array(
+    protected function buildFilterQueryString($query_string, $default_operator='and') {
+        return array(
             'query' => array(
                 'query_string' => array(
                     'default_operator' => $default_operator,
                     'query' => $query_string,
                 )
-
             )
         );
+    }
+
+    public function setFilterQueryString($query_string, $default_operator='and')
+    {
+        $this->filter_query = $this->buildFilterQueryString($query_string, $default_operator);
     }
 
     public function getFilterQueryString()
@@ -388,5 +396,21 @@ class Search extends ElasticsearchBackend implements QueryInterface
     public function getTook()
     {
         return $this->took;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isWithoutAck()
+    {
+        return $this->without_ack;
+    }
+
+    /**
+     * @param boolean $without_ack
+     */
+    public function setWithoutAck($without_ack)
+    {
+        $this->without_ack = $without_ack;
     }
 }

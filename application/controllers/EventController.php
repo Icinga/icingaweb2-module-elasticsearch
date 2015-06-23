@@ -39,6 +39,8 @@ class Logstash_EventController extends Controller
             $this->view->fieldlist = $fields = preg_split('/\s*[,]\s*/', $this->view->fields);
         }
 
+        $this->view->show_ack = $this->_getParam('show_ack', 0);
+
         $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
 
         $this->view->warning = $this->_getParam('warning');
@@ -58,6 +60,9 @@ class Logstash_EventController extends Controller
 
             if ($this->view->filter)
                 $search->setFilterQueryString($this->view->filter);
+
+            if (! $this->view->show_ack)
+                $search->setWithoutAck(true);
 
             $limit = $this->_getParam('limit', 100);
             $page = $this->_getParam('page', 1);

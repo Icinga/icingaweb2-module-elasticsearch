@@ -21,6 +21,11 @@
     <?php else: ?>
     <?= $this->qlink('Refresh fast', $this->url()->setParam('live', true)) ?>
     <?php endif ?>
+    <?php if ($this->show_ack): ?>
+        <?= $this->qlink('Hide acknowledged', $this->url()->without('show_ack')) ?>
+    <?php else: ?>
+        <?= $this->qlink('Show Acknowledged', $this->url()->setParam('show_ack', 1)) ?>
+    <?php endif ?>
 </div>
 <div class="content">
 
