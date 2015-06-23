@@ -118,4 +118,38 @@ class Event extends ElasticsearchBackend
         return (bool) $this->found;
     }
 
+    /**
+     * @param Array $data
+     * @return $this
+     * @throws Exception
+     */
+    public function update_partial(Array $data) {
+        if (!$this->getElasticsearch()) {
+            throw new Exception("Elasticsearch URL has not be configured!");
+        }
+
+        if ($this->found !== true)
+            throw new Exception("document must have been fetched before!");
+
+        if (!$this->index or !$this->type or !$this->id)
+            throw new Exception("index, type and id must be set for updating!");
+
+        $post = array(
+            'doc' => $data,
+        );
+
+        $result = $this->curl->post_json(
+            sprintf('/%s/%s/%s/_update',
+                $this->index,
+                $this->type,
+                $this->id
+            ),
+            $post
+        );
+
+        if ($result !== false) {
+            return true;
+        }
+        else return false;
+    }
 }

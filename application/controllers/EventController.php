@@ -94,4 +94,54 @@ class Logstash_EventController extends Controller
 
         $this->view->event = $event->fetch();
     }
+
+    public function ackAction() {
+        $index = $this->_getParam('index');
+        $type = $this->_getParam('type');
+        $id = $this->_getParam('id');
+        $comment = $this->_getParam('comment');
+        $action = $this->_getParam('comment_action', null);
+
+        $username = "testuser"; //TODO: get icingaweb's username
+
+        $data = array(
+            'icinga_comments' => array(
+                array(
+                    'username'  => $username,
+                    'comment'   => $comment,
+                    'timestamp' => gmstrftime('%Y-%m-%d %H:%M:%S')
+                )
+            )
+        );
+
+        if ($action == 'ack')
+            $data['icinga_acknowledge'] = 1;
+        elseif ($action == 'unack')
+            $data['icinga_acknowledge'] = 0;
+
+        // fetch the event
+        $event = new Event($this->elasticsearch_url);
+
+        $event->setIndex($index);
+        $event->setType($type);
+        $event->setId($id);
+
+        $event->fetch();
+
+        if (property_exists($event->getSource(), 'icinga_comments')) {
+            $data['icinga_comments'] = array_merge($event->getSource()->icinga_comments, $data['icinga_comments']);
+        }
+
+        if ($event->found() !== true)
+            throw new Exception("Event not found! index=%s type=%s id=%s", $index, $type, $id);
+
+        $event->update_partial($data);
+
+        $url = $this->view->url('logstash/event/show', array(
+            'index' => $index,
+            'type' => $type,
+            'id' => $id
+        ));
+        $this->redirectNow($url);
+    }
 }

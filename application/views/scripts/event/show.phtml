@@ -7,7 +7,9 @@
 
     <?php if (!$this->event->found()): ?>
         <p>Document not found!</p>
-    <?php else: ?>
+    <?php else:
+        $source = $this->event->getSource();
+    ?>
 
         <table class="event_detail">
             <tr>
@@ -23,16 +25,21 @@
                 <td><?= $this->escape($this->event->getId()) ?></td>
             </tr>
             <tr>
+                <th>Timestamp</th>
+                <td><?= /* TODO: fix this */ $this->escape(get_object_vars($source)['@timestamp']) ?></td>
+            </tr>
+            <tr>
                 <td colspan="2">&nbsp;</td>
             </tr>
-            <?php foreach($this->event->getSource() as $key => $value):
+            <?php foreach($source as $key => $value):
                 if (substr($key, 0, 1) == '@' or $key == 'type') continue;
             ?>
             <tr>
                 <th><?= $this->escape($key) ?></th>
                 <td><?php
                     if (is_array($value)) {
-                        echo $this->escape(implode(', ', $value));
+                        echo '<pre>'.$this->escape(json_encode($value, JSON_PRETTY_PRINT)).'</pre>';
+                        //echo $this->escape(implode(', ', $value));
                     }
                     elseif (is_object($value)) {
                         echo '<pre>'.$this->escape(json_encode($value, JSON_PRETTY_PRINT)).'</pre>';
@@ -44,6 +51,26 @@
             </tr>
             <?php endforeach ?>
         </table>
+
+        <h4><?= $this->translate('Acknowledge') ?></h4>
+        <form method="post" action="<?= $this->url("logstash/event/ack") ?>">
+            <label>Action</label>
+            <select name="comment_action">
+                <option value="ack">Acknowledge</option>
+                <option value="unack">Remove acknowledgement</option>
+                <option value="comment">Comment only</option>
+            </select>
+            <br/>
+            <label for="comment">Comment</label>
+            <textarea name="comment" id="comment" cols="140" rows="4"></textarea><br/>
+
+            <input type="submit" name="acknowledge" value="Save"/>
+
+            <input type="hidden" name="index" value="<?= $this->event->getIndex() ?>"/>
+            <input type="hidden" name="type" value="<?= $this->event->getType() ?>"/>
+            <input type="hidden" name="id" value="<?= $this->event->getId() ?>"/>
+
+        </form>
 
     <?php endif ?>
 </div>
