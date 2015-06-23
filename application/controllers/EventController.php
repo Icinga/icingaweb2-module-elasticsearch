@@ -43,11 +43,11 @@ class Logstash_EventController extends Controller
 
         $this->view->warning = $this->_getParam('warning');
         if ($this->view->warning) {
-            $search->parseIcingaQueryString('warning', $this->view->warning);
+            $search->setIcingaWarningQuery($this->view->warning);
         }
         $this->view->critical = $this->_getParam('critical');
         if ($this->view->critical) {
-            $search->parseIcingaQueryString('critical', $this->view->critical);
+            $search->setIcingaCriticalQuery($this->view->critical);
         }
 
         if ($this->view->query) {
@@ -72,6 +72,8 @@ class Logstash_EventController extends Controller
             $this->view->hits = $search->fetchAll();
             $this->view->count = $search->count();
             $this->view->took = $search->getTook();
+            $this->view->warnings = $search->getIcingaWarningCount();
+            $this->view->criticals = $search->getIcingaCriticalCount();
         }
     }
 

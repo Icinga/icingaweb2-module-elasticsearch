@@ -28,7 +28,7 @@
         <p>No results found!</p>
     <?php else: ?>
 
-    <p class="small">Found <?= $this->count ?> hits in <?= $this->took ?>ms</p>
+    <p class="small">Found <?= $this->count ?> hits in <?= $this->took ?>ms, <?= $this->warnings ?> warning and <?= $this->criticals ?> critical are shown</p>
 
     <table class="documents" data-base-target="_next">
     <?php if ($this->count > 0): ?>
@@ -40,8 +40,10 @@
         </tr>
         <?php endif; ?>
         <?php foreach ($this->hits as $hit):
-            $state_class = $hit['icinga_status'] == 2 ? 'critical' :
-                ($hit['icinga_status'] == 1 ? 'warning' : '');
+            if (isset($hit['icinga_status']))
+                $state_class = $hit['icinga_status'] == 2 ? 'critical' :
+                    ($hit['icinga_status'] == 1 ? 'warning' : '');
+            else $state_class = "";
             $num = 0;
             $href = $this->url("logstash/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
         ?>

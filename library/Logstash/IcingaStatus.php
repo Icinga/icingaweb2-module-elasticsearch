@@ -2,81 +2,74 @@
 
 namespace Icinga\Module\Logstash;
 
-use Exception;
+use Icinga\Module\Logstash\Helpers\QueryString;
 
 trait IcingaStatus
 {
     protected $icinga_status_fields = array();
-    protected $icinga_patterns = array();
 
-    public function clearIcingaPatterns()
-    {
-        $this->icinga_patterns = array();
-    }
+    protected $icinga_warning_query = null;
+    protected $icinga_critical_query = null;
 
-    public function addIcingaPattern($for, $field, $pattern)
-    {
-        assert($for == 'warning' or $for == 'critical', '$for must be warning or critical');
+    protected $icinga_warning_count = 0;
+    protected $icinga_critical_count = 0;
 
-        if (!in_array($field, $this->icinga_status_fields))
-            $this->icinga_status_fields[] = $field;
+    /**
+     * @param String $query_string Elasticsearch compatible query_string
+     * @return $this
+     */
+    public function setIcingaWarningQuery($query_string) {
+        if ($this->icinga_warning_query === null)
+            $this->icinga_warning_query = new QueryString();
 
-        $this->icinga_patterns[$for][] = array(
-            'field'   => $field,
-            'pattern' => $pattern
-        );
+        $this->icinga_warning_query->parse($query_string);
+        return $this;
     }
 
     /**
-     * @return array
+     * @param String $query_string Elasticsearch compatible query_string
+     * @return $this
      */
-    public function getIcingaPatterns()
-    {
-        return $this->icinga_patterns;
+    public function setIcingaCriticalQuery($query_string) {
+        if ($this->icinga_critical_query === null)
+            $this->icinga_critical_query = new QueryString();
+
+        $this->icinga_critical_query->parse($query_string);
+        return $this;
     }
 
-    protected function IcingaStatusMatcher($pattern, $value)
+    /**
+     * @return int
+     */
+    public function getIcingaWarningCount()
     {
-        if (false) // TODO: build other patterns
-            return preg_match($pattern, $value) === 1;
-        else
-            return strpos($value, $pattern) !== false;
+        return $this->icinga_warning_count;
     }
 
-    protected function evalIcingaStatus(&$document)
+    /**
+     * @return int
+     */
+    public function getIcingaCriticalCount()
     {
-        if (!is_array($document))
-            throw new Exception('$document must be an Array');
+        return $this->icinga_critical_count;
+    }
 
-        $warning = 0;
-        $critical = 0;
-        foreach ($this->icinga_patterns as $status => $list) {
-            foreach ($list as $el) {
-                $field = $el['field'];
-                $pattern = $el['pattern'];
-                if (array_key_exists($field, $document))
-                    if ($this->IcingaStatusMatcher($pattern, $document[$field]))
-                        ${$status}++;
-            }
+    /**
+     * @param Array $document
+     */
+    protected function evalIcingaStatus(Array &$document)
+    {
+        assert(is_array($document), '$document must be an Array!');
+
+        $document['icinga_status'] = 0;
+        if ($this->icinga_warning_query !== null and $this->icinga_warning_query->match($document) === true) {
+            $document['icinga_status'] = 1;
+            $this->icinga_warning_count++;
         }
-
-        $document['icinga_status'] =
-            ($critical > 0) ? 2 : ($warning > 0 ? 1 : 0);
-        ;
-    }
-
-    public function parseIcingaQueryString($for, $query_string)
-    {
-
-        $matches = array();
-        if (preg_match_all("/(\w+):(\"[^\"]*?\"|\([^\)]*?\)|\S+)/", $query_string, $matches, PREG_SET_ORDER)) {
-            foreach ($matches as $match) {
-                $field = $match[1];
-                $pattern = $match[2];
-                $this->addIcingaPattern($for, $field, $pattern);
-            }
+        if ($this->icinga_critical_query !== null and $this->icinga_critical_query->match($document) === true) {
+            $document['icinga_status'] = 2;
+            $this->icinga_critical_count++;
         }
-
     }
 
 }
