@@ -30,11 +30,21 @@ table.documents {
   tr.warning > td:first-child {
     border-color: @colorWarning;
   }
+  tr.warning.handled > td:first-child {
+    border-color: @colorWarningHandled;
+  }
   tr.critical > td:first-child {
     border-color: @colorCritical;
   }
+  tr.critical.handled > td:first-child {
+    border-color: @colorCriticalHandled ! important;
+  }
   tr.state a {
-    font-weight: normal;
+    color: inherit;
+    text-decoration: none;
+  }
+  tr.state a:hover {
+    text-decoration: underline;
   }
 
   td {

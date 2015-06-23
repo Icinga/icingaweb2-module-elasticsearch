@@ -74,6 +74,10 @@ class Logstash_EventController extends Controller
             $this->view->took = $search->getTook();
             $this->view->warnings = $search->getIcingaWarningCount();
             $this->view->criticals = $search->getIcingaCriticalCount();
+
+            if ($page > 1 and count($this->view->hits) == 0) {
+                $this->redirectNow($this->view->url()->without( 'page'));
+            }
         }
     }
 
