@@ -15,6 +15,47 @@ Be WARNED, this module is not yet tested against big Elasticsearch installations
 
 Neither is this module currently supported by anyone, use at your own risk.
 
+## Use the check in Icinga 2
+
+Here is a example how to use the check in Icinga2:
+
+``` icinga2
+object CheckCommand "logstash_events" {
+  import "plugin-check-command"
+
+  command = [ "/usr/bin/icingacli", "logstash", "check" ]
+
+  arguments = {
+    "--query"    = "$logstash_query$"
+    "--filter"   = "$logstash_filter$"
+    "--fields"   = "$logstash_fields$"
+    "--warning"  = "$logstash_warning$"
+    "--critical" = "$logstash_critical$"
+    "--list" = {
+      set_if = "$logstash_list$"
+    }
+  }
+
+  vars.logstash_list = false
+}
+
+apply Service "logstash syslog" {
+  import "generic-service"
+
+  check_command = "logstash_events"
+
+  var hostname = host.name.split(".")
+
+  vars.logstash_query = "type:syslog logsource:" + hostname[0]
+  vars.logstash_filter = "NOT severity_label:(Informational OR Notice OR Emergency)"
+  vars.logstash_fields = "@timestamp,severity_label,facility_label,message"
+  vars.logstash_warning = "severity_label:Warning"
+  vars.logstash_critical = "severity_label:(Alert Error Emergency Critical)"
+
+  assign where host.kernel == "Linux"
+}
+```
+
 ## About
 
 This module was created as part of my consulting work with [NETWAYS](http://www.netways.de).
