@@ -4,6 +4,9 @@ use Icinga\Module\Logstash\Controller;
 use Icinga\Module\Logstash\Search;
 use Icinga\Module\Logstash\Event;
 
+use Icinga\Module\Monitoring\Backend;
+use Icinga\Module\Monitoring\Object\Host;
+use Icinga\Module\Monitoring\Object\Service;
 use Icinga\Web\Widget\Limiter;
 use Icinga\Web\Widget\Paginator;
 
@@ -154,5 +157,103 @@ class Logstash_EventController extends Controller
             'id' => $id
         ));
         $this->redirectNow($url);
+    }
+
+    public function listAction() {
+        $host_name = $this->_getParam('host');
+        $service_name = $this->_getParam('service');
+
+        if (!$host_name or !$service_name)
+            throw new Exception('host and service are required params!');
+
+        // TODO: monitoring enabled?
+        $backend = Backend::createBackend();
+
+        $service = new Service($backend, $host_name, $service_name);
+
+        if (!$service->fetch())
+            throw new Exception('Service could not be found!');
+
+        // data from service
+        // TODO: we only have pretty names here
+        //       https://dev.icinga.org/issues/9482
+
+        if (isset($service->customvars['Logstash Query']))
+            $this->view->query = $service->customvars['Logstash Query'];
+        else throw new Exception('Could not find cv logstash_query!');
+
+        $this->view->filter = null;
+        if (isset($service->customvars['Logstash Filter']))
+            $this->view->filter = $service->customvars['Logstash Filter'];
+
+        $this->view->fields = null;
+        if (isset($service->customvars['Logstash Fields']))
+            $this->view->fields = $service->customvars['Logstash Fields'];
+
+        $this->view->warning = null;
+        if (isset($service->customvars['Logstash Warning']))
+            $this->view->warning = $service->customvars['Logstash Warning'];
+
+        $this->view->critical = null;
+        if (isset($service->customvars['Logstash Critical']))
+            $this->view->critical = $service->customvars['Logstash Critical'];
+
+        // setup search
+        $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
+
+        $search->setQueryString($this->view->query);
+        $search->setFilterQueryString($this->view->filter);
+
+        if ($this->view->warning)
+            $search->setIcingaWarningQuery($this->view->warning);
+        if ($this->view->critical)
+            $search->setIcingaCriticalQuery($this->view->critical);
+        $search->setFilteredByIcingaQueries(true);
+
+        // extra params
+        $this->view->show_ack = $this->_getParam('show_ack', 0);
+        if (! $this->view->show_ack)
+            $search->setWithoutAck(true);
+
+        $limit = $this->_getParam('limit', 100);
+        $page = $this->_getParam('page', 1);
+        $search->limit($limit, $limit * ($page-1));
+
+        // other params and view setup
+        $this->view->compact = $this->_getParam('view') === 'compact';
+
+        $this->view->live = $this->params->shift('live');
+        if ($this->view->live) {
+            $this->setAutorefreshInterval(1);
+        } else {
+            $this->setAutorefreshInterval(15);
+        }
+
+        $this->view->fieldlist = array();
+        if ($this->view->fields) {
+            $this->view->fieldlist = preg_split('/\s*[,]\s*/', $this->view->fields);
+        }
+
+        $this->view->limiter = new Limiter();
+        $this->view->limiter->setDefaultLimit(100);
+
+        $this->view->paginator = new Paginator();
+        $this->view->paginator->setQuery($search);
+
+        $this->view->hits = $search->fetchAll();
+        $this->view->count = $search->count();
+        $this->view->took = $search->getTook();
+        $this->view->warnings = $search->getIcingaWarningCount();
+        $this->view->criticals = $search->getIcingaCriticalCount();
+
+        if ($page > 1 and count($this->view->hits) == 0) {
+            $this->redirectNow($this->view->url()->without( 'page'));
+        }
+
+        $this->getTabs()->add('list', array(
+            'title' => $this->translate('Events'),
+            'url'   => $this->view->url()
+        ))->activate(('list'));;
+
     }
 }

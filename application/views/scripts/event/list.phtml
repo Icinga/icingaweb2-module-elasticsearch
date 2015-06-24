@@ -1,4 +1,4 @@
-<?php if (! $this->compact): ?>
+    <?php if (! $this->compact): ?>
 <div class="controls">
     <?= $this->tabs ?>
     <?= $this->limiter; ?>
@@ -6,26 +6,27 @@
 </div>
 <?php endif ?>
 <div class="filter">
-    <form action="<?= $this->url()->without('query')->without('filter')->without('fields') ?>" class="inline" method="get">
-        <label for="query">Query:</label><input type="text" name="query" value="<?= $this->escape($this->query) ?>" /><br/>
-        <label for="filter">Filter:</label><input type="text" name="filter" value="<?= $this->escape($this->filter) ?>" /><br/>
-        <label for="fields">Fields:</label><input type="text" name="fields" value="<?= $this->escape($this->fields) ?>" /><br/>
-        <label for="warning">Warning:</label><input type="text" name="warning" value="<?= $this->escape($this->warning) ?>" /><br/>
-        <label for="critical">Critical:</label><input type="text" name="critical" value="<?= $this->escape($this->critical) ?>" /><br/>
-        <label for="size"></label>
-        <input type="submit" value="Search" name="" style="width: 5em" />
-    </form>
-
     <?php if ($this->live): ?>
     <?= $this->qlink('Refresh slow', $this->url()->without('live')) ?>
     <?php else: ?>
     <?= $this->qlink('Refresh fast', $this->url()->setParam('live', true)) ?>
     <?php endif ?>
+    -
     <?php if ($this->show_ack): ?>
         <?= $this->qlink('Hide acknowledged', $this->url()->without('show_ack')) ?>
     <?php else: ?>
         <?= $this->qlink('Show Acknowledged', $this->url()->setParam('show_ack', 1)) ?>
     <?php endif ?>
+    -
+    <?php /* TODO: admin only */ ?>
+    <?= $this->qlink('Go to search', $this->url('logstash/event/search', array(
+        'query' => $this->query,
+        'filter' => $this->filter,
+        'fields' => $this->fields,
+        'warning' => $this->warning,
+        'critical' => $this->critical,
+    ))) ?>
+
 </div>
 <div class="content">
     <?php /** TODO: split template and load with partial()  */ ?>
