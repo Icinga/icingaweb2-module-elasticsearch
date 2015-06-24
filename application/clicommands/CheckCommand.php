@@ -49,11 +49,12 @@ class CheckCommand extends Command {
      * Usage: icingacli logstash check <options>
      *
      * Options:
-     *   -Q --query    Elasticsearch query string for events
-     *   -F --filter   Elasticsearch filter string for the queried events
-     *   -f --fields   A comma separated list of fields to show in the output (optional)
-     *   -W --warning  Filter string to match warning events (similar to Elasticsearch)
-     *   -C --critical Filter string to match critical events (similar to Elasticsearch)
+     *   --query    Elasticsearch query string for events
+     *   --filter   Elasticsearch filter string for the queried events
+     *   --fields   A comma separated list of fields to show in the output (optional)
+     *   --warning  Filter string to match warning events (similar to Elasticsearch)
+     *   --critical Filter string to match critical events (similar to Elasticsearch)
+     *   --list     List found events in command output
      *
      * Note: these options are the same as in the web frontend!
      */
@@ -64,6 +65,7 @@ class CheckCommand extends Command {
         $fields = $this->params->get('fields');
         $warning = $this->params->get('warning');
         $critical = $this->params->get('critical');
+        $list = $this->params->get('list');
 
         // internal limit - try not to temper with it
         $limit = 1000;
@@ -107,17 +109,18 @@ class CheckCommand extends Command {
                 $status = 1;
             elseif ($critical > 0)
                 $status = 2;
-            elseif ($count > $limit) {
+            else
+                $status = 0;
+
+            if ($count > $limit) {
                 $message .= sprintf(", we found more than %d events, Icinga State calculation is incorrect!",
                     $limit
                 );
                 $status = 3;
             }
-            else
-                $status = 0;
 
             $long = array();
-            if ($fields) {
+            if ($list and $fields) {
                 $fieldlist = preg_split('/\s*,\s*/', trim($fields));
                 foreach($events as $event) {
                     $line = array();
