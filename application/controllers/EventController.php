@@ -174,29 +174,28 @@ class Logstash_EventController extends Controller
         if (!$service->fetch())
             throw new Exception('Service could not be found!');
 
+        $cv = (array) $service->customvars;
+        
         // data from service
-        // TODO: we only have pretty names here
-        //       https://dev.icinga.org/issues/9482
-
-        if (isset($service->customvars['Logstash Query']))
-            $this->view->query = $service->customvars['Logstash Query'];
+        if (isset($cv['logstash_query']))
+            $this->view->query = $cv['logstash_query'];
         else throw new Exception('Could not find cv logstash_query!');
 
         $this->view->filter = null;
-        if (isset($service->customvars['Logstash Filter']))
-            $this->view->filter = $service->customvars['Logstash Filter'];
+        if (isset($cv['logstash_filter']))
+            $this->view->filter = $cv['logstash_filter'];
 
         $this->view->fields = null;
-        if (isset($service->customvars['Logstash Fields']))
-            $this->view->fields = $service->customvars['Logstash Fields'];
+        if (isset($cv['logstash_fields']))
+            $this->view->fields = $cv['logstash_fields'];
 
         $this->view->warning = null;
-        if (isset($service->customvars['Logstash Warning']))
-            $this->view->warning = $service->customvars['Logstash Warning'];
+        if (isset($cv['logstash_warning']))
+            $this->view->warning = $cv['logstash_warning'];
 
         $this->view->critical = null;
-        if (isset($service->customvars['Logstash Critical']))
-            $this->view->critical = $service->customvars['Logstash Critical'];
+        if (isset($cv['logstash_critical']))
+            $this->view->critical = $cv['logstash_critical'];
 
         // setup search
         $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
