@@ -12,8 +12,10 @@ class ServiceActions extends ServiceActionsHook
     public function getActionsForService(Service $service)
     {
         if ($service->check_command == "logstash_events") {
+            // TODO: add icon when Icingaweb2 supports it
+            // <i class="icon-doc-text"></i>
             return array(
-                '<i class="icon-doc-text"></i>Logstash' => Url::fromPath('logstash/event/list', array(
+                mt('logstash', 'Logstash events') => Url::fromPath('logstash/event/list', array(
                         'host' => $service->getHost()->getName(),
                         'service' => $service->getName()
                     )
