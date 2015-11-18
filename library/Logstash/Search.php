@@ -6,6 +6,7 @@ use Icinga\Data\Filter\Filter;
 use Icinga\Data\Limitable;
 use Icinga\Data\Sortable;
 use Icinga\Data\QueryInterface;
+use Icinga\Exception\IcingaException;
 use Icinga\Exception\ProgrammingError;
 use Exception;
 
@@ -431,6 +432,7 @@ class Search extends ElasticsearchBackend implements QueryInterface
 
     /**
      * @param boolean $filtered_by_icinga_queries
+     * @throws IcingaException
      */
     public function setFilteredByIcingaQueries($filtered_by_icinga_queries)
     {
@@ -438,14 +440,14 @@ class Search extends ElasticsearchBackend implements QueryInterface
 
         if ($filtered_by_icinga_queries) {
             $filter = array();
-            if ($qs = $this->getIcingaCriticalQuery()->getQueryString()) {
+            if ($this->getIcingaWarningQuery() and $qs = $this->getIcingaWarningQuery()->getQueryString()) {
                 $filter[] = $this->buildFilterQueryString($qs, 'or');
             }
-            if ($qs = $this->getIcingaCriticalQuery()->getQueryString()) {
+            if ($this->getIcingaCriticalQuery() and $qs = $this->getIcingaCriticalQuery()->getQueryString()) {
                 $filter[] = $this->buildFilterQueryString($qs, 'or');
             }
             if (count($filter) == 0)
-                throw new Exception("There are no Icinga queries to be filtered with!");
+                throw new IcingaException('There are no Icinga queries to be filtered with!');
 
             $this->filter_icinga = array('or' => $filter);
         }
