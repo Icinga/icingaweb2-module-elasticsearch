@@ -4,15 +4,15 @@ namespace Icinga\Module\Logstash;
 
 use Icinga\Data\Filter\Filter;
 use Icinga\Data\Limitable;
+use Icinga\Data\Paginatable;
 use Icinga\Data\Sortable;
-use Icinga\Data\QueryInterface;
 use Icinga\Exception\IcingaException;
 use Icinga\Exception\ProgrammingError;
 use Exception;
 
 use Icinga\Module\Logstash\Curl;
 
-class Search extends ElasticsearchBackend implements QueryInterface
+class Search extends ElasticsearchBackend implements Limitable, Sortable, Paginatable
 {
     use IcingaStatus;
 
@@ -208,68 +208,6 @@ class Search extends ElasticsearchBackend implements QueryInterface
     }
 
     /**
-     * Fetch the first row of the result set
-     *
-     * @return  mixed
-     */
-    public function fetchRow()
-    {
-        // TODO: Implement fetchRow() method.
-    }
-
-    /**
-     * Fetch the first column of all rows of the result set as an array
-     *
-     * @return  array
-     */
-    public function fetchColumn()
-    {
-        // TODO: Implement fetchColumn() method.
-    }
-
-    /**
-     * Fetch the first column of the first row of the result set
-     *
-     * @return  string
-     */
-    public function fetchOne()
-    {
-        // TODO: Implement fetchOne() method.
-    }
-
-    /**
-     * Fetch all rows of the result set as an array of key-value pairs
-     *
-     * The first column is the key, the second column is the value.
-     *
-     * @return  array
-     */
-    public function fetchPairs()
-    {
-        // TODO: Implement fetchPairs() method.
-    }
-
-    public function applyFilter(Filter $filter)
-    {
-        // TODO: Implement applyFilter() method.
-    }
-
-    public function setFilter(Filter $filter)
-    {
-        // TODO: Implement setFilter() method.
-    }
-
-    public function getFilter()
-    {
-        // TODO: Implement getFilter() method.
-    }
-
-    public function where($condition, $value = null)
-    {
-        // TODO: Implement where() method.
-    }
-
-    /**
      * Set a limit count and offset
      *
      * @param   int $count Number of rows to return
@@ -375,11 +313,6 @@ class Search extends ElasticsearchBackend implements QueryInterface
     public function getOrder()
     {
         return [ $this->sort_field, $this->sort_direction ];
-    }
-
-    public function addFilter(Filter $filter)
-    {
-        // TODO: Implement addFilter() method.
     }
 
     /**
