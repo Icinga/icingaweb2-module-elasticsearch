@@ -58,11 +58,7 @@ apply Service "logstash syslog" {
 
 ## About
 
-This module was created as part of my consulting work with [NETWAYS](http://www.netways.de).
-
-    Copyright (c) 2015 NETWAYS GmbH <info@netways.de>
-                  2015 Thomas Gelf <thomas.gelf@netways.de>
-                  2015 Markus Frosch <markus@lazyfrosch.de>
+    Copyright (c) 2015-2016 Icinga Development Team (https://www.icinga.org/)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
