@@ -1,13 +1,14 @@
 <?php
+/* Icinga Web 2 - Logstash Module | (c) 2016 Icinga Development Team | GPLv2+ */
 
-use Icinga\Web\Controller\ModuleActionController;
+namespace Icinga\Module\Logstash\Controllers;
 
+use Icinga\Module\Logstash\Controller;
 
-class Logstash_IndexController extends ModuleActionController
+class IndexController extends Controller
 {
-
-    public function indexAction() {
+    public function indexAction()
+    {
         $this->redirectNow('logstash/event/search');
     }
-
 }

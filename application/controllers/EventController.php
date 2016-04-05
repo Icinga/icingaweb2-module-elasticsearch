@@ -1,6 +1,11 @@
 <?php
 
+/* Icinga Web 2 - Logstash Module | (c) 2016 Icinga Development Team | GPLv2+ */
+
+namespace Icinga\Module\Logstash\Controllers;
+
 use Icinga\Module\Logstash\Controller;
+
 use Icinga\Module\Logstash\Search;
 use Icinga\Module\Logstash\Event;
 
@@ -10,7 +15,7 @@ use Icinga\Module\Monitoring\Object\Service;
 use Icinga\Web\Widget\Limiter;
 use Icinga\Web\Widget\Paginator;
 
-class Logstash_EventController extends Controller
+class EventController extends Controller
 {
     public function indexAction() {
         $this->redirectNow('logstash/event/search');
