@@ -1,13 +1,10 @@
 <div class="content">
 
-    <p>There is no valid config in <?= $this->escape($this->configFile) ?>.</p>
+    <h1><?= $this->translate('The Logstash module has not been configured yet!') ?></h1>
 
-    <p>Here is an example:</p>
-
-    <pre>
-    [elasticsearch]
-    url = http://elasticsearch.example.org:9200
-    index_pattern = logstash-*
-    </pre>
+    <p>
+        <?= $this->translate('Please go to the configuration section:') ?>
+        <?= $this->qlink($this->translate('Elasticsearch configuration'), 'logstash/config/elasticsearch') ?>
+    </p>
 
 </div>
