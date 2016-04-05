@@ -56,6 +56,28 @@ apply Service "logstash syslog" {
 }
 ```
 
+## Development environment
+
+You can pull up a quick ELK test environment in Docker with the included [docker-compose File](docker-compose.yml).
+
+After firing that up you will have:
+
+* Elasticsearch [http://localhost:9200](http://localhost:9200)
+* Kibana Dashboard [http://localhost:5601](http://localhost:5601)
+* Logstash prepared for syslog (tcp and udp on port `1514`)
+* Icingaweb2 with this module [http://localhost:8080](http://localhost:8080)
+  (setup token: docker) (auto-http login as icingaadmin - please select external auth)
+
+You can fire syslogs to get actual data into ELK:
+
+**/etc/rsyslog.d/logstash-local.conf**
+
+    *.* @127.0.0.1:1514
+    
+Or manually:
+
+    logger -n 127.0.0.1 -
+
 ## About
 
     Copyright (c) 2015-2016 Icinga Development Team (https://www.icinga.org/)
