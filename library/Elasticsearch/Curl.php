@@ -1,6 +1,6 @@
 <?php
 
-namespace Icinga\Module\Logstash;
+namespace Icinga\Module\Elasticsearch;
 
 use Exception;
 

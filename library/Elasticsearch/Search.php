@@ -1,6 +1,6 @@
 <?php
 
-namespace Icinga\Module\Logstash;
+namespace Icinga\Module\Elasticsearch;
 
 use Icinga\Data\Filter\Filter;
 use Icinga\Data\Limitable;
@@ -10,7 +10,7 @@ use Icinga\Exception\IcingaException;
 use Icinga\Exception\ProgrammingError;
 use Exception;
 
-use Icinga\Module\Logstash\Curl;
+use Icinga\Module\Elasticsearch\Curl;
 
 class Search extends ElasticsearchBackend implements Limitable, Sortable, Paginatable
 {

@@ -1,5 +1,5 @@
 <?php
 
-//$this->registerHook('Monitoring\\HostActions', '\\Icinga\\Module\\Logstash\\HostActions');
-$this->registerHook('Monitoring\\ServiceActions', '\\Icinga\\Module\\Logstash\\ServiceActions');
+//$this->registerHook('Monitoring\\HostActions', '\\Icinga\\Module\\Elasticsearch\\HostActions');
+$this->registerHook('Monitoring\\ServiceActions', '\\Icinga\\Module\\Elasticsearch\\ServiceActions');
 

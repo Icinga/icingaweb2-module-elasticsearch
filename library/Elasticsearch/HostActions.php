@@ -1,6 +1,6 @@
 <?php
 
-namespace Icinga\Module\Logstash;
+namespace Icinga\Module\Elasticsearch;
 
 use Icinga\Module\Monitoring\Web\Hook\HostActionsHook;
 use Icinga\Module\Monitoring\Object\Host;

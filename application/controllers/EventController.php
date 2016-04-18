@@ -1,13 +1,12 @@
 <?php
+/* Elasticsearch Module | (c) 2016 Icinga Development Team | GPLv2+ */
 
-/* Icinga Web 2 - Logstash Module | (c) 2016 Icinga Development Team | GPLv2+ */
+namespace Icinga\Module\Elasticsearch\Controllers;
 
-namespace Icinga\Module\Logstash\Controllers;
+use Icinga\Module\Elasticsearch\Controller;
 
-use Icinga\Module\Logstash\Controller;
-
-use Icinga\Module\Logstash\Search;
-use Icinga\Module\Logstash\Event;
+use Icinga\Module\Elasticsearch\Search;
+use Icinga\Module\Elasticsearch\Event;
 
 use Icinga\Module\Monitoring\Backend;
 use Icinga\Module\Monitoring\Object\Host;
@@ -18,7 +17,7 @@ use Icinga\Web\Widget\Paginator;
 class EventController extends Controller
 {
     public function indexAction() {
-        $this->redirectNow('logstash/event/search');
+        $this->redirectNow('elasticsearch/event/search');
     }
 
     public function searchAction()
@@ -180,7 +179,7 @@ class EventController extends Controller
             throw new Exception('Service could not be found!');
 
         $cv = (array) $service->customvars;
-        
+
         // data from service
         if (isset($cv['logstash_query']))
             $this->view->query = $cv['logstash_query'];

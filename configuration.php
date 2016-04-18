@@ -5,7 +5,7 @@ $section = $this->menuSection('Logstash')
 
 $section->add(t('Event search'))
         ->setIcon('search')
-        ->setUrl('logstash/event/search');
+        ->setUrl('elasticsearch/event/search');
 
 $this->provideConfigTab('elasticsearch', array(
     'title' => $this->translate('Configure Elasticsearch settings'),

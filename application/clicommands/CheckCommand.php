@@ -1,10 +1,10 @@
 <?php
 
-namespace Icinga\Module\Logstash\Clicommands;
+namespace Icinga\Module\Elasticsearch\Clicommands;
 
 use Icinga\Cli\Command;
 use Icinga\Exception\IcingaException as Exception;
-use Icinga\Module\Logstash\Search;
+use Icinga\Module\Elasticsearch\Search;
 
 /**
  * Usage: icingacli logstash check <options>

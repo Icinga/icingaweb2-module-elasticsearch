@@ -1,9 +1,9 @@
 <?php
-/* Icinga Web 2 - Logstash Module | (c) 2016 Icinga Development Team | GPLv2+ */
+/* Elasticsearch Module | (c) 2016 Icinga Development Team | GPLv2+ */
 
-namespace Icinga\Module\Logstash\Controllers;
+namespace Icinga\Module\Elasticsearch\Controllers;
 
-use Icinga\Module\Logstash\Controller;
+use Icinga\Module\Elasticsearch\Controller;
 
 class IndexController extends Controller
 {

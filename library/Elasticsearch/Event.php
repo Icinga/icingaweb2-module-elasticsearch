@@ -1,8 +1,8 @@
 <?php
 
-namespace Icinga\Module\Logstash;
+namespace Icinga\Module\Elasticsearch;
 
-use Icinga\Module\Logstash\Curl;
+use Icinga\Module\Elasticsearch\Curl;
 use Exception;
 use stdClass;
 

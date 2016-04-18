@@ -1,8 +1,8 @@
 <?php
 
-namespace Icinga\Module\Logstash;
+namespace Icinga\Module\Elasticsearch;
 
-use Icinga\Module\Logstash\Helpers\QueryString;
+use Icinga\Module\Elasticsearch\Helpers\QueryString;
 
 trait IcingaStatus
 {

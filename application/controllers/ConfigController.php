@@ -1,10 +1,10 @@
 <?php
-/* Icinga Web 2 - Logstash Module | (c) 2016 Icinga Development Team | GPLv2+ */
+/* Elasticsearch Module | (c) 2016 Icinga Development Team | GPLv2+ */
 
-namespace Icinga\Module\Logstash\Controllers;
+namespace Icinga\Module\Elasticsearch\Controllers;
 
-use Icinga\Module\Logstash\Controller;
-use Icinga\Module\Logstash\Forms\Config\ElasticsearchConfigForm;
+use Icinga\Module\Elasticsearch\Controller;
+use Icinga\Module\Elasticsearch\Forms\Config\ElasticsearchConfigForm;
 
 /**
  * Configuration controller for the module
@@ -12,7 +12,7 @@ use Icinga\Module\Logstash\Forms\Config\ElasticsearchConfigForm;
 class ConfigController extends Controller
 {
     protected $ignore_elasticsearch = true;
-    
+
     public function indexAction()
     {
         $this->redirectNow('logstash/config/elasticsearch');
