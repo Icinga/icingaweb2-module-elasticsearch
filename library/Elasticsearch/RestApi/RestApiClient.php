@@ -4,6 +4,7 @@
 namespace Icinga\Module\Elasticsearch\RestApi;
 
 use ArrayIterator;
+use LogicException;
 use Icinga\Data\Extensible;
 use Icinga\Data\Filter\Filter;
 use Icinga\Data\Reducible;
@@ -173,7 +174,39 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      */
     public function insert($target, array $data)
     {
-        throw new NotImplementedError('Inserts are not supported yet');
+        if (is_string($target)) {
+            $target = explode('/', $target);
+        }
+
+        switch (count($target)) {
+            case 3:
+                list($index, $documentType, $id) = $target;
+                break;
+            case 2:
+                list($index, $documentType) = $target;
+                $id = null;
+                break;
+            default:
+                throw new LogicException('Invalid target "%s"', join('/', $target));
+        }
+
+        try {
+            $response = $this->request(new IndexApiRequest($index, $documentType, $id, $data));
+        } catch (RestApiException $e) {
+            throw new StatementException(
+                'Failed to index document "%s". An error occurred: %s',
+                join('/', $target),
+                $e
+            );
+        }
+
+        if (! $response->isSuccess()) {
+            throw new StatementException(
+                'Unable to index document "%s": %s',
+                join('/', $target),
+                $this->renderErrorMessage($response)
+            );
+        }
     }
 
     /**
