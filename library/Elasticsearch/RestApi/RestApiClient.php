@@ -9,6 +9,7 @@ use Icinga\Data\Filter\Filter;
 use Icinga\Data\Reducible;
 use Icinga\Data\Selectable;
 use Icinga\Data\Updatable;
+use Icinga\Exception\IcingaException;
 use Icinga\Exception\NotImplementedError;
 use Icinga\Exception\StatementException;
 
@@ -204,5 +205,27 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     public function delete($target, Filter $filter = null)
     {
         throw new NotImplementedError('Deletions are not supported yet');
+    }
+
+    /**
+     * Render and return a human readable error message for the given error document
+     *
+     * @return  string
+     *
+     * @todo    Parse Elasticsearch 2.x structured errors
+     */
+    public function renderErrorMessage(RestApiResponse $response)
+    {
+        try {
+            $errorDocument = $response->json();
+        } catch (IcingaException $e) {
+            return $response->getPayload();
+        }
+
+        if (! isset($errorDocument['error'])) {
+            return $response->getPayload();
+        }
+
+        return $errorDocument['error'];
     }
 }
