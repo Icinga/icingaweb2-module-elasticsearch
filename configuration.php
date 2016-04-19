@@ -1,6 +1,6 @@
 <?php
 
-$section = $this->menuSection('Logstash')
+$section = $this->menuSection('Elasticsearch')
     ->setIcon('doc-text');
 
 $section->add(t('Event search'))
