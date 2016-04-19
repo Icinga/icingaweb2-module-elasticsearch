@@ -9,6 +9,6 @@ class IndexController extends Controller
 {
     public function indexAction()
     {
-        $this->redirectNow('logstash/event/search');
+        $this->redirectNow('elasticsearch/event/search');
     }
 }

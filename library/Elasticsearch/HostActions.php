@@ -13,7 +13,7 @@ class HostActions extends HostActionsHook
         return array();
         /* TODO
         return array(
-            'Syslog' => Url::fromPath('logstash/event/search', array('host' => $host->host_name))
+            'Syslog' => Url::fromPath('elasticsearch/event/search', array('host' => $host->host_name))
         );
         */
     }

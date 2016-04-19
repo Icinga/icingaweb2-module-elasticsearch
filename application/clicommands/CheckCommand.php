@@ -7,7 +7,7 @@ use Icinga\Exception\IcingaException as Exception;
 use Icinga\Module\Elasticsearch\Search;
 
 /**
- * Usage: icingacli logstash check <options>
+ * Usage: icingacli elasticsearch check <options>
  */
 class CheckCommand extends Command {
 
@@ -44,9 +44,9 @@ class CheckCommand extends Command {
     }
 
     /**
-     * Check for Logstash Events that might be a warning or a critical for Icinga
+     * Check for Elasticsearch Events that might be a warning or a critical for Icinga
      *
-     * Usage: icingacli logstash check <options>
+     * Usage: icingacli elasticsearch check <options>
      *
      * Options:
      *   --query    Elasticsearch query string for events

@@ -56,7 +56,7 @@
                 $icons[] = $this->icon('ok', 'Acknowledged');
             }
             $num = 0;
-            $href = $this->url("logstash/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
+            $href = $this->url("elasticsearch/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
         ?>
             <tr class="document state <?= join(" ", $classes) ?>"
                 data-elastic-index="<?= $hit['_index'] ?>"

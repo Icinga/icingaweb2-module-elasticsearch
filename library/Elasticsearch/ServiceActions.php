@@ -15,7 +15,7 @@ class ServiceActions extends ServiceActionsHook
             // TODO: add icon when Icingaweb2 supports it
             // <i class="icon-doc-text"></i>
             return array(
-                mt('logstash', 'Logstash events') => Url::fromPath('logstash/event/list', array(
+                mt('logstash', 'Logstash events') => Url::fromPath('elasticsearch/event/list', array(
                         'host' => $service->getHost()->getName(),
                         'service' => $service->getName()
                     )

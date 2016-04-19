@@ -1,5 +1,5 @@
-Icingaweb2 Logstash Integration
-===============================
+Icingaweb2 Elasticsearch Integration
+====================================
 
 This is a very early test module for Icingaweb2, offering Logstash Event integration.
 

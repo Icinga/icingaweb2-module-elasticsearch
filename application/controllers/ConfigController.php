@@ -15,7 +15,7 @@ class ConfigController extends Controller
 
     public function indexAction()
     {
-        $this->redirectNow('logstash/config/elasticsearch');
+        $this->redirectNow('elasticsearch/config/elasticsearch');
     }
 
     /**

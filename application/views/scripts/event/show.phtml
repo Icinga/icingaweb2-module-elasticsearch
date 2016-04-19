@@ -53,7 +53,7 @@
         </table>
 
         <h4><?= $this->translate('Acknowledge') ?></h4>
-        <form method="post" action="<?= $this->url("logstash/event/ack") ?>">
+        <form method="post" action="<?= $this->url("elasticsearch/event/ack") ?>">
             <label>Action</label>
             <select name="comment_action">
                 <option value="ack">Acknowledge</option>

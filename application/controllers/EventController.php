@@ -155,7 +155,7 @@ class EventController extends Controller
 
         $event->update_partial($data);
 
-        $url = $this->view->url('logstash/event/show', array(
+        $url = $this->view->url('elasticsearch/event/show', array(
             'index' => $index,
             'type' => $type,
             'id' => $id

@@ -19,7 +19,7 @@
     <?php endif ?>
     -
     <?php /* TODO: admin only */ ?>
-    <?= $this->qlink('Go to search', $this->url('logstash/event/search', array(
+    <?= $this->qlink('Go to search', $this->url('elasticsearch/event/search', array(
         'query' => $this->query,
         'filter' => $this->filter,
         'fields' => $this->fields,
@@ -57,7 +57,7 @@
                 $icons[] = $this->icon('ok', 'Acknowledged');
             }
             $num = 0;
-            $href = $this->url("logstash/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
+            $href = $this->url("elasticsearch/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
         ?>
             <tr class="document state <?= join(" ", $classes) ?>"
                 data-elastic-index="<?= $hit['_index'] ?>"
