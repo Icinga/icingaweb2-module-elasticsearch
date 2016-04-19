@@ -4,6 +4,7 @@
 namespace Icinga\Module\Elasticsearch\RestApi;
 
 use LogicException;
+use Icinga\Exception\IcingaException;
 use Icinga\Web\UrlParams;
 
 class RestApiRequest
@@ -188,5 +189,31 @@ class RestApiRequest
     public function getPayload()
     {
         return $this->payload;
+    }
+
+    /**
+     * Return the given data encoded as JSON
+     *
+     * @param   mixed   $data
+     *
+     * @return  string
+     *
+     * @throws  IcingaException     In case the encoding has failed
+     */
+    protected function jsonEncode($data)
+    {
+        $data = json_encode($data);
+        if ($data !== false) {
+            return $data;
+        }
+
+        $errorNo = json_last_error();
+        if ($errorNo === JSON_ERROR_CTRL_CHAR) {
+            throw new IcingaException('Failed to encode JSON. Control character found.');
+        } elseif ($errorNo === JSON_ERROR_UTF8) {
+            throw new IcingaException('Failed to encode JSON. Input is not encoded with UTF-8.');
+        } else {
+            throw new IcingaException('Failed to encode JSON. Unknown error %u occurred.', $errorNo);
+        }
     }
 }
