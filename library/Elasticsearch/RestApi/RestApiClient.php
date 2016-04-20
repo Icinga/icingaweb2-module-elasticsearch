@@ -279,7 +279,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     }
 
     /**
-     * Delete entries in the given target, optionally limiting the affected entries by using a filter
+     * Delete documents in the given target, optionally limiting the affected documents by using a filter
      *
      * Note that the given filter will have no effect in case the target represents a single document.
      *
@@ -287,10 +287,52 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   Filter          $filter
      *
      * @throws  StatementException
+     *
+     * @todo    Add support for filters and bulk deletions
      */
     public function delete($target, Filter $filter = null)
     {
-        throw new NotImplementedError('Deletions are not supported yet');
+        if ($filter !== null) {
+            throw new NotImplementedError('Delete requests with filter are not supported yet');
+        }
+
+        if (is_string($target)) {
+            $target = explode('/', $target);
+        }
+
+        switch (count($target)) {
+            case 3:
+                list($index, $documentType, $id) = $target;
+                break;
+            case 2:
+                if ($filter === null) {
+                    throw new LogicException('Update requests without id are required to provide a filter');
+                }
+
+                list($index, $documentType) = $target;
+                $id = null;
+                break;
+            default:
+                throw new LogicException('Invalid target "%s"', join('/', $target));
+        }
+
+        try {
+            $response = $this->request(new DeleteApiRequest($index, $documentType, $id));
+        } catch (RestApiException $e) {
+            throw new StatementException(
+                'Failed to delete document "%s". An error occurred: %s',
+                join('/', $target),
+                $e
+            );
+        }
+
+        if (! $response->isSuccess()) {
+            throw new StatementException(
+                'Unable to delete document "%s": %s',
+                join('/', $target),
+                $this->renderErrorMessage($response)
+            );
+        }
     }
 
     /**
