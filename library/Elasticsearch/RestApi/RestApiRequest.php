@@ -75,8 +75,8 @@ class RestApiRequest
             $this->headers = array();
         }
 
-        if ($this->payload) {
-            $this->headers[] = sprintf('Content-Length: %u', strlen($this->payload));
+        if (($payload = $this->getPayload())) {
+            $this->headers[] = sprintf('Content-Length: %u', strlen($payload));
             if ($this->contentType) {
                 $this->headers[] = sprintf('Content-Type: ' . $this->contentType);
             }
