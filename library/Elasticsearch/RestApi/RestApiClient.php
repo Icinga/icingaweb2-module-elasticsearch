@@ -254,6 +254,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         }
 
         $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => $data));
+        $request->getParams()->add('fields', '_source');
+
         try {
             $response = $this->request($request);
         } catch (RestApiException $e) {
@@ -271,6 +273,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 $this->renderErrorMessage($response)
             );
         }
+
+        $json = $response->json();
+        return $json['get']['_source'];
     }
 
     /**
