@@ -359,4 +359,16 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         return $errorDocument['error'];
     }
+
+    /**
+     * Render and return the given filter as Elasticsearch query
+     *
+     * @param   Filter  $filter
+     *
+     * @return  string
+     */
+    public function renderFilter(Filter $filter)
+    {
+        return array('match_all' => array());
+    }
 }
