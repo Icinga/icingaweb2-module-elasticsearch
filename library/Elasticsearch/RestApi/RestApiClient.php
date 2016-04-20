@@ -13,6 +13,7 @@ use Icinga\Data\Updatable;
 use Icinga\Exception\IcingaException;
 use Icinga\Exception\NotImplementedError;
 use Icinga\Exception\StatementException;
+use Icinga\Module\Elasticsearch\Exception\RestApiException;
 
 class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 {
@@ -127,7 +128,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         $result = curl_exec($curl);
         if ($result === false) {
-            throw new RestApiException(curl_errno($curl), curl_error($curl));
+            $restApiException = RestApiException(curl_error($curl));
+            $restApiException->setErrorCode(curl_errno($curl));
+            throw new $restApiException;
         }
 
         $response = new RestApiResponse(curl_getinfo($curl, CURLINFO_HTTP_CODE));
