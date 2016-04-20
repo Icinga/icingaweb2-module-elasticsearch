@@ -13,6 +13,7 @@ use Icinga\Data\Updatable;
 use Icinga\Exception\IcingaException;
 use Icinga\Exception\NotImplementedError;
 use Icinga\Exception\StatementException;
+use Icinga\Exception\QueryException;
 use Icinga\Module\Elasticsearch\Exception\RestApiException;
 
 class RestApiClient implements Extensible, Reducible, Selectable, Updatable
@@ -189,6 +190,43 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         $json = $response->json();
         return $json['count'];
+    }
+
+    /**
+     * Retrieve an array containing all documents of the result set
+     *
+     * @param   RestApiQuery    $query
+     *
+     * @return  array
+     */
+    public function fetchAll(RestApiQuery $query)
+    {
+        $body = array(
+            'from'  => $query->getOffset() ?: 0,
+            'size'  => $query->hasLimit() ? $query->getLimit() : 10,
+            'query' => $this->renderFilter($query->getFilter())
+        );
+        if (($columns = $query->getColumns()) === null || !empty($columns)) {
+            $body['_source'] = $columns === null ? false : $columns;
+        }
+        if ($query->hasOrder()) {
+            $sort = array();
+            foreach ($query->getOrder() as $order) {
+                $sort[] = array($order[0] => strtolower($order[1]));
+            }
+
+            $body['sort'] = $sort;
+        }
+
+        $request = new SearchApiRequest($query->getIndices(), $query->getTypes(), $body);
+
+        $response = $this->request($request);
+        if (! $response->isSuccess()) {
+            throw new QueryException($this->renderErrorMessage($response));
+        }
+
+        $json = $response->json();
+        return $json['hits']['hits'];
     }
 
     /**
