@@ -170,6 +170,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   string|array    $target
      * @param   array           $data
      *
+     * @return  bool                    Whether the document has been created or not
+     *
      * @throws  StatementException
      */
     public function insert($target, array $data)
@@ -207,6 +209,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 $this->renderErrorMessage($response)
             );
         }
+
+        $json = $response->json();
+        return $json['created'];
     }
 
     /**
