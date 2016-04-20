@@ -153,7 +153,10 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      */
     public function select(array $indices = null, array $types = null)
     {
-        throw new NotImplementedError('Queries are not supported yet');
+        $query = new RestApiQuery($this);
+        $query->setIndices($indices);
+        $query->setTypes($types);
+        return $query;
     }
 
     /**
