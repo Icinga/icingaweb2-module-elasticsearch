@@ -168,6 +168,18 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     }
 
     /**
+     * Fetch the first field of all documents of the result set as an array
+     *
+     * @param   RestApiQuery    $query
+     *
+     * @return  array
+     */
+    public function fetchColumn(RestApiQuery $query)
+    {
+        throw new NotImplementedError('RestApiClient::fetchColumn() is not implemented yet');
+    }
+
+    /**
      * Fetch the first field of the first document of the result set
      *
      * @param   RestApiQuery    $query
