@@ -265,7 +265,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         if (! $response->isSuccess()) {
             throw new StatementException(
-                'Unable to index document "%s": %s',
+                'Unable to update document "%s": %s',
                 join('/', $target),
                 $this->renderErrorMessage($response)
             );
