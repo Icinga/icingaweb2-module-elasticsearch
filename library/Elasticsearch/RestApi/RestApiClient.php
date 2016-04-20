@@ -239,10 +239,6 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         switch (count($target)) {
             case 3:
-                if ($filter !== null) {
-                    throw new LogicException('Update requests with id must not provide a filter');
-                }
-
                 list($index, $documentType, $id) = $target;
                 break;
             case 2:
