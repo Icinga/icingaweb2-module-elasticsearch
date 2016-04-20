@@ -122,7 +122,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         $curl = $this->getConnection();
         curl_setopt($curl, CURLOPT_HTTPHEADER, $request->getHeaders());
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $request->getMethod());
-        curl_setopt($curl, CURLOPT_URL, $scheme . $path . $query);
+        curl_setopt($curl, CURLOPT_URL, $scheme . $this->host . $path . $query);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $request->getPayload());
 
         $result = curl_exec($curl);
