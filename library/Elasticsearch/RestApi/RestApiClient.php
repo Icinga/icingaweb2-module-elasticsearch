@@ -168,6 +168,20 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     }
 
     /**
+     * Fetch all documents of the result set as an array of key-value pairs
+     *
+     * The first field is the key, the second field is the value.
+     *
+     * @param   RestApiQuery    $query
+     *
+     * @return  array
+     */
+    public function fetchPairs(RestApiQuery $query)
+    {
+        throw new NotImplementedError('RestApiClient::fetchPairs() is not implemented yet');
+    }
+
+    /**
      * Insert the given data for the given target
      *
      * @param   string|array    $target
