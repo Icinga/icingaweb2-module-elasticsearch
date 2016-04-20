@@ -11,6 +11,11 @@ class SearchApiRequest extends RestApiRequest
     protected $method = 'GET';
 
     /**
+     * The search API endpoint
+     */
+    const ENDPOINT = '_search';
+
+    /**
      * The patterns defining the indices where to search for documents
      *
      * @var array
@@ -45,11 +50,16 @@ class SearchApiRequest extends RestApiRequest
     {
         if ($this->path === null) {
             if ($this->indices === null) {
-                $this->path = '/_search';
+                $this->path = static::ENDPOINT;
             } elseif ($this->types === null) {
-                $this->path = '/' . join(',', $this->indices);
+                $this->path = sprintf('%s/%s', join(',', $this->indices), static::ENDPOINT);
             } else {
-                $this->path = sprintf('/%s/%s/_search', join(',', $this->indices), join(',', $this->types));
+                $this->path = sprintf(
+                    '%s/%s/%s',
+                    join(',', $this->indices),
+                    join(',', $this->types),
+                    static::ENDPOINT
+                );
             }
         }
 
