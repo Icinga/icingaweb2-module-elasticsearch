@@ -93,7 +93,7 @@ class RestApiResponse
      */
     public function setContentType($contentType)
     {
-        $this->contentType = $contentType;
+        $this->contentType = str_replace(' ', '', $contentType);
         return $this;
     }
 
@@ -127,13 +127,13 @@ class RestApiResponse
      */
     public function json()
     {
-        if ($this->contentType !== 'application/json') {
-            throw new IcingaException('Cannot parse content of type "%s" as JSON', $this->contentType);
-        }
-
         $json = json_decode($this->getPayload(), true);
         if ($json !== null) {
             return $json;
+        }
+
+        if ($this->contentType && substr($this->contentType, 0, 16) !== 'application/json') {
+            throw new IcingaException('Cannot parse content of type "%s" as JSON', $this->contentType);
         }
 
         throw new IcingaException(
