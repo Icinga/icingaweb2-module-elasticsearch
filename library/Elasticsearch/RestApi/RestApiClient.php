@@ -168,6 +168,18 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     }
 
     /**
+     * Fetch the first field of the first document of the result set
+     *
+     * @param   RestApiQuery    $query
+     *
+     * @return  string
+     */
+    public function fetchOne(RestApiQuery $query)
+    {
+        throw new NotImplementedError('RestApiClient::fetchOne() is not implemented yet');
+    }
+
+    /**
      * Fetch all documents of the result set as an array of key-value pairs
      *
      * The first field is the key, the second field is the value.
