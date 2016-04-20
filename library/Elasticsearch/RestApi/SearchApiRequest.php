@@ -49,9 +49,13 @@ class SearchApiRequest extends RestApiRequest
     public function getPath()
     {
         if ($this->path === null) {
-            if ($this->indices === null) {
-                $this->path = static::ENDPOINT;
-            } elseif ($this->types === null) {
+            if (empty($this->indices)) {
+                if (empty($this->types)) {
+                    $this->path = static::ENDPOINT;
+                } else {
+                    $this->path = sprintf('*/%s/%s', join(',', $this->types), static::ENDPOINT);
+                }
+            } elseif (empty($this->types)) {
                 $this->path = sprintf('%s/%s', join(',', $this->indices), static::ENDPOINT);
             } else {
                 $this->path = sprintf(
