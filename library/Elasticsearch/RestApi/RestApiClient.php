@@ -230,6 +230,21 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     }
 
     /**
+     * Fetch the first document of the result set
+     *
+     * @param   RestApiQuery    $query
+     *
+     * @return  array|false
+     */
+    public function fetchRow(RestApiQuery $query)
+    {
+        $clonedQuery = clone $query;
+        $clonedQuery->limit(1);
+        $results = $this->fetchAll($clonedQuery);
+        return array_shift($results) ?: false;
+    }
+
+    /**
      * Fetch the first field of all documents of the result set as an array
      *
      * @param   RestApiQuery    $query
