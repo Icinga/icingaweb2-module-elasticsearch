@@ -253,8 +253,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 throw new LogicException('Invalid target "%s"', join('/', $target));
         }
 
+        $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => $data));
         try {
-            $response = $this->request(new UpdateApiRequest($index, $documentType, $id, $data));
+            $response = $this->request($request);
         } catch (RestApiException $e) {
             throw new StatementException(
                 'Failed to update document "%s". An error occurred: %s',
