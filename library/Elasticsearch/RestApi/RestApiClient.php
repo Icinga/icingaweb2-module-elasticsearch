@@ -344,6 +344,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   array           $data
      * @param   Filter          $filter
      *
+     * @return  array   The updated document
+     *
      * @throws  StatementException
      *
      * @todo    Add support for filters and bulk updates
