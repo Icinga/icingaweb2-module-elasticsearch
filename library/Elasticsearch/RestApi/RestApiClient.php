@@ -286,6 +286,36 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     }
 
     /**
+     * Fetch and return the given document
+     *
+     * @param   string  $index          The index the document is located in
+     * @param   string  $documentType   The type of the document to fetch
+     * @param   string  $id             The id of the document to fetch
+     * @param   array   $fields         The desired fields to return instead of all fields
+     *
+     * @return  array|false             Returns false in case no document could be found
+     */
+    public function fetchDocument($index, $documentType, $id, array $fields = null)
+    {
+        $request = new GetApiRequest($index, $documentType, $id);
+        if (! empty($fields)) {
+            $request->getParams()->add('_source', join(',', $fields));
+        }
+
+        $response = $this->request($request);
+        if (! $response->isSuccess()) {
+            if ($response->getStatusCode() === 404) {
+                return false;
+            }
+
+            throw new QueryException($this->renderErrorMessage($response));
+        }
+
+        $json = $response->json();
+        return $json['_source'];
+    }
+
+    /**
      * Insert the given data for the given target
      *
      * @param   string|array    $target
