@@ -2,43 +2,43 @@
 
 namespace Icinga\Module\Elasticsearch;
 
-use Icinga\Module\Elasticsearch\Curl;
 use Exception;
+use Icinga\Exception\IcingaException;
+use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
 use stdClass;
 
-class Event extends ElasticsearchBackend
+/**
+ * @todo reimplement?
+ */
+class Event
 {
+    /** @var  RestApiClient */
+    protected $client;
+
     protected $index;
     protected $type;
     protected $id;
 
     protected $found = false;
-    protected $version;
     protected $source;
+
+    public function __construct(RestApiClient $client)
+    {
+        $this->client = $client;
+    }
 
     public function fetch()
     {
-        if (!$this->getElasticsearch()) {
-            throw new Exception("Elasticsearch URL has not be configured!");
-        }
-
         if (!$this->index or !$this->type or !$this->id)
             throw new Exception("index, type and id must be set for fetching!");
 
-        $result = $this->curl->get_json(
-            sprintf('/%s/%s/%s',
-                $this->index,
-                $this->type,
-                $this->id
-            )
-        );
+        $result = $this->client->fetchDocument($this->index, $this->type, $this->id);
 
-        if ($result !== false or $result->found !== false) {
-            $this->found = true;
-            $this->version = $result->_version;
-            $this->source = $result->_source;
+        if ($result !== false) {
+            $this->source = $result;
+            return $this;
         }
-        return $this;
+        else return false;
     }
 
     /**
@@ -99,52 +99,28 @@ class Event extends ElasticsearchBackend
     }
 
     /**
-     * @return Integer
-     */
-    public function getVersion()
-    {
-        return $this->version;
-    }
-
-    /**
-     * @return stdClass
+     * @return array
      */
     public function getSource()
     {
         return $this->source;
     }
 
-    public function found() {
-        return (bool) $this->found;
-    }
-
     /**
-     * @param Array $data
+     * @param array $data
      * @return $this
      * @throws Exception
      */
     public function update_partial(Array $data) {
-        if (!$this->getElasticsearch()) {
-            throw new Exception("Elasticsearch URL has not be configured!");
-        }
-
-        if ($this->found !== true)
-            throw new Exception("document must have been fetched before!");
+        if ($this->source === null)
+            throw new IcingaException("document must have been fetched before!");
 
         if (!$this->index or !$this->type or !$this->id)
-            throw new Exception("index, type and id must be set for updating!");
+            throw new IcingaException("index, type and id must be set for updating!");
 
-        $post = array(
-            'doc' => $data,
-        );
-
-        $result = $this->curl->post_json(
-            sprintf('/%s/%s/%s/_update',
-                $this->index,
-                $this->type,
-                $this->id
-            ),
-            $post
+        $result = $this->client->update(
+            array($this->index, $this->type, $this->id),
+            $data
         );
 
         if ($result !== false) {

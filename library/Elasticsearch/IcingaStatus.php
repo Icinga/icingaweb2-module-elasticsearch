@@ -4,6 +4,10 @@ namespace Icinga\Module\Elasticsearch;
 
 use Icinga\Module\Elasticsearch\Helpers\QueryString;
 
+/**
+ * @deprecated reimplement
+ * @todo reimplement!!
+ */
 trait IcingaStatus
 {
     protected $icinga_status_fields = array();
