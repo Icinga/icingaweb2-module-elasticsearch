@@ -129,9 +129,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         $result = curl_exec($curl);
         if ($result === false) {
-            $restApiException = RestApiException(curl_error($curl));
+            $restApiException = new RestApiException(curl_error($curl));
             $restApiException->setErrorCode(curl_errno($curl));
-            throw new $restApiException;
+            throw $restApiException;
         }
 
         $response = new RestApiResponse(curl_getinfo($curl, CURLINFO_HTTP_CODE));
