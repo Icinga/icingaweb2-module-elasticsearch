@@ -36,10 +36,10 @@ abstract class DocumentApiRequest extends RestApiRequest
      */
     public function __construct($index, $documentType, $id = null, array $data = null)
     {
-        $this->setId($id)
-            ->setIndex($index)
-            ->setDocumentType($documentType)
-            ->setPayload($data, $data !== null ? 'application/json' : null);
+        $this->id = $id;
+        $this->index = $index;
+        $this->documentType = $documentType;
+        $this->setPayload($data, $data !== null ? 'application/json' : null);
     }
 
     /**
