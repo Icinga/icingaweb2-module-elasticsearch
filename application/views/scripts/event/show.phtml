@@ -5,7 +5,7 @@
 <?php endif ?>
 <div class="content">
 
-    <?php if (!$this->event->found()): ?>
+    <?php if ($this->event === null): ?>
         <p>Document not found!</p>
     <?php else:
         $source = $this->event->getSource();
@@ -26,7 +26,7 @@
             </tr>
             <tr>
                 <th>Timestamp</th>
-                <td><?= /* TODO: fix this */ $this->escape(get_object_vars($source)['@timestamp']) ?></td>
+                <td><?= $this->escape($source['@timestamp']) ?></td>
             </tr>
             <tr>
                 <td colspan="2">&nbsp;</td>

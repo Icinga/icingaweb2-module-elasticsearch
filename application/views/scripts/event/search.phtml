@@ -3,9 +3,12 @@
     <?= $this->tabs ?>
     <?= $this->limiter; ?>
     <?= $this->paginator; ?>
+    <?= $this->filterEditor ?>
 </div>
 <?php endif ?>
 <div class="filter">
+
+    <?php /*
     <form action="<?= $this->url()->without('query')->without('filter')->without('fields') ?>" class="inline" method="get">
         <label for="query">Query:</label><input type="text" name="query" value="<?= $this->escape($this->query) ?>" /><br/>
         <label for="filter">Filter:</label><input type="text" name="filter" value="<?= $this->escape($this->filter) ?>" /><br/>
@@ -26,19 +29,19 @@
     <?php else: ?>
         <?= $this->qlink('Show Acknowledged', $this->url()->setParam('show_ack', 1)) ?>
     <?php endif ?>
+    */ ?>
 </div>
 <div class="content">
     <?php /** TODO: split template and load with partial()  */ ?>
 
-    <?php if ($this->count == 0): ?>
+    <?php if (property_exists($this, 'error')): ?>
+        <h3><?= $this->error?></h3>
+    <?php elseif (empty($this->hits)): ?>
         <p>No results found!</p>
     <?php else: ?>
 
-    <p class="small">Found <?= $this->count ?> hits in <?= $this->took ?>ms, <?= $this->warnings ?> warning and <?= $this->criticals ?> critical are shown</p>
-
     <table class="documents" data-base-target="_next">
-    <?php if ($this->count > 0): ?>
-        <?php if (count($this->fieldlist) > 0): ?>
+    <?php if (!empty($this->hits)): ?>
         <tr class="header">
             <?php foreach($this->fieldlist as $field): ?>
             <th><?= $this->escape($field) ?></th>
@@ -76,7 +79,6 @@
                 <?php endif ?>
             </tr>
         <?php endforeach ?>
-        <?php endif ?>
     </table>
     <?php endif ?>
 </div>

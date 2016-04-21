@@ -3,25 +3,56 @@
 
 namespace Icinga\Module\Elasticsearch\Controllers;
 
+use Icinga\Exception\IcingaException;
+
+use Icinga\Exception\NotImplementedError;
 use Icinga\Module\Elasticsearch\Controller;
 
-use Icinga\Module\Elasticsearch\Search;
+use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
 use Icinga\Module\Elasticsearch\Event;
 
 use Icinga\Module\Monitoring\Backend;
 use Icinga\Module\Monitoring\Object\Host;
 use Icinga\Module\Monitoring\Object\Service;
+
+use Icinga\Web\Widget\FilterEditor;
 use Icinga\Web\Widget\Limiter;
 use Icinga\Web\Widget\Paginator;
+use Icinga\Web\Widget;
 
 class EventController extends Controller
 {
-    public function indexAction() {
+    public function indexAction()
+    {
         $this->redirectNow('elasticsearch/event/search');
     }
 
     public function searchAction()
     {
+        $client = new RestApiClient($this->elasticsearch_url);
+        $query = $client->select(array($this->index_pattern));
+
+        // TODO: use ElasticsearchRepository for columns
+        /** @var FilterEditor $editor */
+        $editor = Widget::create('filterEditor');
+        $editor->setQuery($query)
+               ->setSearchColumns(array('message')) // TODO
+               ->preserveParams('sort', 'dir', 'limit')
+               ->ignoreParams('page')
+               ->setColumns(array( // TODO
+                   'logsource',
+                   'host',
+                   'program',
+                   'message',
+                   'severity',
+                   'severity_label',
+                   'facility',
+                   'facility_label',
+               ))
+               ->handleRequest($this->getRequest());
+
+        $this->view->filterEditor = $editor;
+
         $this->getTabs()->add('search', array(
             'title' => $this->translate('Events'),
             'url'   => $this->view->url()
@@ -36,9 +67,6 @@ class EventController extends Controller
             $this->setAutorefreshInterval(15);
         }
 
-        $this->view->query = $this->_getParam('query');
-        $this->view->filter = $this->_getParam('filter');
-
         $fields = null;
         $this->view->fields = $this->_getParam('fields');
         $this->view->fieldlist = array();
@@ -46,9 +74,8 @@ class EventController extends Controller
             $this->view->fieldlist = $fields = preg_split('/\s*[,]\s*/', $this->view->fields);
         }
 
+        /* TODO: adapt to FilterEditor
         $this->view->show_ack = $this->_getParam('show_ack', 0);
-
-        $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
 
         $this->view->warning = $this->_getParam('warning');
         if ($this->view->warning) {
@@ -58,38 +85,38 @@ class EventController extends Controller
         if ($this->view->critical) {
             $search->setIcingaCriticalQuery($this->view->critical);
         }
+        */
 
-        if ($this->view->query) {
-            $search->setQueryString($this->view->query);
+        // TODO: reimplement
+        //if (isset($fields))
+        //    $search->setFields($fields);
 
-            //if (isset($fields))
-            //    $search->setFields($fields);
 
-            if ($this->view->filter)
-                $search->setFilterQueryString($this->view->filter);
+        // TODO: reimplement
+        //if (! $this->view->show_ack)
+        //    $search->setWithoutAck(true);
 
-            if (! $this->view->show_ack)
-                $search->setWithoutAck(true);
+        $limit = $this->_getParam('limit', 100);
+        $page = $this->_getParam('page', 1);
+        $query->limit($limit, $limit * ($page-1));
 
-            $limit = $this->_getParam('limit', 100);
-            $page = $this->_getParam('page', 1);
-            $search->limit($limit, $limit * ($page-1));
+        $this->view->limiter = new Limiter();
+        $this->view->limiter->setDefaultLimit(100);
 
-            $this->view->limiter = new Limiter();
-            $this->view->limiter->setDefaultLimit(100);
+        $this->view->paginator = new Paginator();
+        $this->view->paginator->setQuery($query);
 
-            $this->view->paginator = new Paginator();
-            $this->view->paginator->setQuery($search);
+        $this->view->hits = $query->fetchAll();
 
-            $this->view->hits = $search->fetchAll();
-            $this->view->count = $search->count();
-            $this->view->took = $search->getTook();
-            $this->view->warnings = $search->getIcingaWarningCount();
-            $this->view->criticals = $search->getIcingaCriticalCount();
+        // TODO: reimplement
+        //$this->view->warnings = $search->getIcingaWarningCount();
+        //$this->view->criticals = $search->getIcingaCriticalCount();
 
-            if ($page > 1 and count($this->view->hits) == 0) {
-                $this->redirectNow($this->view->url()->without( 'page'));
-            }
+        // TODO: remove debug
+        //$this->view->filter_json = $search->getRenderedFilter();
+
+        if ($page > 1 and count($this->view->hits) == 0) {
+            $this->redirectNow($this->view->url()->without( 'page'));
         }
     }
 
@@ -104,7 +131,8 @@ class EventController extends Controller
             'url'   => $this->view->url()
         ))->activate(('show'));
 
-        $event = new Event($this->elasticsearch_url);
+        $client = new RestApiClient($this->elasticsearch_url);
+        $event = new Event($client);
 
         $event->setIndex($index);
         $event->setType($type);
@@ -113,6 +141,10 @@ class EventController extends Controller
         $this->view->event = $event->fetch();
     }
 
+    /**
+     * @todo move code into Event
+     * @throws IcingaException
+     */
     public function ackAction() {
         $index = $this->_getParam('index');
         $type = $this->_getParam('type');
@@ -138,20 +170,21 @@ class EventController extends Controller
             $data['icinga_acknowledge'] = 0;
 
         // fetch the event
-        $event = new Event($this->elasticsearch_url);
+        $client = new RestApiClient($this->elasticsearch_url);
+        $event = new Event($client);
 
         $event->setIndex($index);
         $event->setType($type);
         $event->setId($id);
 
-        $event->fetch();
-
-        if (property_exists($event->getSource(), 'icinga_comments')) {
-            $data['icinga_comments'] = array_merge($event->getSource()->icinga_comments, $data['icinga_comments']);
+        if ($event->fetch() === false) {
+            throw new IcingaException("Event not found! index=%s type=%s id=%s", $index, $type, $id);
         }
 
-        if ($event->found() !== true)
-            throw new Exception("Event not found! index=%s type=%s id=%s", $index, $type, $id);
+        $source = $event->getSource();
+        if (array_key_exists('icinga_comments', $source)) {
+            $data['icinga_comments'] = array_merge($source['icinga_comments'], $data['icinga_comments']);
+        }
 
         $event->update_partial($data);
 
@@ -163,12 +196,20 @@ class EventController extends Controller
         $this->redirectNow($url);
     }
 
+    /**
+     * @todo reimplement with log-types!
+     * @throws IcingaException
+     * @throws \Icinga\Exception\Http\HttpNotFoundException
+     * @throws \Icinga\Exception\ProgrammingError
+     */
     public function listAction() {
+        throw new NotImplementedError('list action is currently not implemented!');
+        /*
         $host_name = $this->_getParam('host');
         $service_name = $this->_getParam('service');
 
         if (!$host_name or !$service_name)
-            throw new Exception('host and service are required params!');
+            throw new IcingaException('host and service are required params!');
 
         // TODO: monitoring enabled?
         $backend = Backend::createBackend();
@@ -176,14 +217,14 @@ class EventController extends Controller
         $service = new Service($backend, $host_name, $service_name);
 
         if (!$service->fetch())
-            throw new Exception('Service could not be found!');
+            throw new IcingaException('Service could not be found!');
 
         $cv = (array) $service->customvars;
 
         // data from service
         if (isset($cv['logstash_query']))
             $this->view->query = $cv['logstash_query'];
-        else throw new Exception('Could not find cv logstash_query!');
+        else throw new IcingaException('Could not find cv logstash_query!');
 
         $this->view->filter = null;
         if (isset($cv['logstash_filter']))
@@ -201,26 +242,27 @@ class EventController extends Controller
         if (isset($cv['logstash_critical']))
             $this->view->critical = $cv['logstash_critical'];
 
-        // setup search
-        $search = new Search($this->elasticsearch_url."/".$this->index_pattern);
+        // query elasticsearch
+        $client = new RestApiClient($this->elasticsearch_url);
+        $query = $client->select(array($this->index_pattern));
 
-        $search->setQueryString($this->view->query);
-        $search->setFilterQueryString($this->view->filter);
+        $query->setQueryString($this->view->query);
+        $query->setFilterQueryString($this->view->filter);
 
         if ($this->view->warning)
-            $search->setIcingaWarningQuery($this->view->warning);
+            $query->setIcingaWarningQuery($this->view->warning);
         if ($this->view->critical)
-            $search->setIcingaCriticalQuery($this->view->critical);
-        $search->setFilteredByIcingaQueries(true);
+            $query->setIcingaCriticalQuery($this->view->critical);
+        $query->setFilteredByIcingaQueries(true);
 
         // extra params
         $this->view->show_ack = $this->_getParam('show_ack', 0);
         if (! $this->view->show_ack)
-            $search->setWithoutAck(true);
+            $query->setWithoutAck(true);
 
         $limit = $this->_getParam('limit', 100);
         $page = $this->_getParam('page', 1);
-        $search->limit($limit, $limit * ($page-1));
+        $query->limit($limit, $limit * ($page-1));
 
         // other params and view setup
         $this->view->compact = $this->_getParam('view') === 'compact';
@@ -234,20 +276,20 @@ class EventController extends Controller
 
         $this->view->fieldlist = array();
         if ($this->view->fields) {
-            $this->view->fieldlist = preg_split('/\s*[,]\s*/', $this->view->fields);
+            $this->view->fieldlist = preg_split('#\s*[,]\s*#', $this->view->fields);
         }
 
         $this->view->limiter = new Limiter();
         $this->view->limiter->setDefaultLimit(100);
 
         $this->view->paginator = new Paginator();
-        $this->view->paginator->setQuery($search);
+        $this->view->paginator->setQuery($query);
 
-        $this->view->hits = $search->fetchAll();
-        $this->view->count = $search->count();
-        $this->view->took = $search->getTook();
-        $this->view->warnings = $search->getIcingaWarningCount();
-        $this->view->criticals = $search->getIcingaCriticalCount();
+        $this->view->hits = $query->fetchAll();
+        $this->view->count = $query->count();
+        $this->view->took = $query->getTook();
+        $this->view->warnings = $query->getIcingaWarningCount();
+        $this->view->criticals = $query->getIcingaCriticalCount();
 
         if ($page > 1 and count($this->view->hits) == 0) {
             $this->redirectNow($this->view->url()->without( 'page'));
@@ -257,6 +299,6 @@ class EventController extends Controller
             'title' => $this->translate('Events'),
             'url'   => $this->view->url()
         ))->activate(('list'));;
-
+        */
     }
 }
