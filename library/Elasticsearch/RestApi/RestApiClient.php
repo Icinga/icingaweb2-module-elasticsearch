@@ -519,6 +519,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      */
     public function renderFilter(Filter $filter)
     {
-        return array('match_all' => (object) null);
+        $renderer = new FilterRenderer($filter);
+        return $renderer->getQuery();
     }
 }
