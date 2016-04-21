@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\Elasticsearch\RestApi;
 
+use Icinga\Application\Logger;
 use Icinga\Data\Filter\FilterMatch;
 use Icinga\Data\Filter\FilterMatchNot;
 use Icinga\Exception\ProgrammingError;
@@ -54,6 +55,7 @@ class FilterRenderer {
     {
         $this->filter = $filter;
         $this->query = $this->renderFilter($this->filter);
+        Logger::debug('Rendered elasticsearch filter: %s', json_encode($this->query, JSON_PRETTY_PRINT));
         return $this;
     }
 
@@ -106,8 +108,7 @@ class FilterRenderer {
                                 );
                                 continue;
                             }
-                        }
-                        elseif ($filter instanceof FilterAnd) {
+                        } elseif ($filter instanceof FilterAnd) {
                             // add match not to must_not instead of must
                             if ($filterPart instanceof FilterMatchNot) {
                                 $container['must_not'][] = $part;
@@ -125,7 +126,10 @@ class FilterRenderer {
                 // return the bool of the chain
                 return array('bool' => $container);
             } else {
-                return null; // Explicitly return the empty string due to the FilterNot case
+                // return match_all
+                return array(
+                    'match_all' => (object) array(),
+                );
             }
         } else {
             // return the simple part
