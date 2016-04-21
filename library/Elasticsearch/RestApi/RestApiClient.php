@@ -515,7 +515,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @param   Filter  $filter
      *
-     * @return  string
+     * @return  array
      */
     public function renderFilter(Filter $filter)
     {
