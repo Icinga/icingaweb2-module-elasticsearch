@@ -37,7 +37,7 @@ class MappingApiRequest extends IndicesApiRequest
                 if (preg_match('#,#', $type)) {
                     throw new LogicException('a type must not contain a comma!');
                 }
-                $types = urlencode(trim($type));
+                $types[] = urlencode(trim($type));
             }
             return sprintf('/%s/_mapping/%s', $this->index, join(',', $types));
         }
