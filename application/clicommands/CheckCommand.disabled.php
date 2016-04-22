@@ -4,22 +4,23 @@ namespace Icinga\Module\Elasticsearch\Clicommands;
 
 use Icinga\Cli\Command;
 use Icinga\Exception\IcingaException as Exception;
-use Icinga\Module\Elasticsearch\Search;
 
 /**
  * Usage: icingacli elasticsearch check <options>
+ *
+ * @todo reimplement in module
  */
 class CheckCommand extends Command {
 
     protected $elasticsearch_url;
     protected $index_pattern;
 
-    protected $stateMap = [
+    protected $stateMap = array(
         0 => 'OK',
         1 => 'WARNING',
         2 => 'CRITICAL',
         3 => 'UNKNOWN'
-    ];
+    );
 
     protected function pluginError($message) {
         $this->pluginExit($message, 3);
@@ -58,6 +59,7 @@ class CheckCommand extends Command {
      *
      * Note: these options are the same as in the web frontend!
      */
+    /*
     public function defaultAction() {
 
         $query = $this->params->get('query');
@@ -121,7 +123,7 @@ class CheckCommand extends Command {
 
             $long = array();
             if ($list and $fields) {
-                $fieldlist = preg_split('/\s*,\s*/', trim($fields));
+                $fieldlist = preg_split('#\s*,\s*#', trim($fields));
                 foreach($events as $event) {
                     $line = array();
                     foreach($fieldlist as $field) {
@@ -140,5 +142,6 @@ class CheckCommand extends Command {
         }
 
     }
+    */
 
 }
