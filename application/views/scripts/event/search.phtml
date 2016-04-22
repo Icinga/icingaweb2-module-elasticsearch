@@ -41,7 +41,7 @@
     <?php else: ?>
 
     <table class="documents" data-base-target="_next">
-    <?php if (!empty($this->hits)): ?>
+        <?php if (! empty($this->fieldlist)): ?>
         <tr class="header">
             <?php foreach($this->fieldlist as $field): ?>
             <th><?= $this->escape($field) ?></th>
@@ -51,6 +51,7 @@
         <?php foreach ($this->hits as $hit):
             $classes = array();
             $icons = array();
+            /* TODO: reimplement
             if (isset($hit['icinga_status']))
                 $classes[] = $hit['icinga_status'] == 2 ? 'critical' :
                     ($hit['icinga_status'] == 1 ? 'warning' : '');
@@ -58,16 +59,17 @@
                 $classes[] = 'handled';
                 $icons[] = $this->icon('ok', 'Acknowledged');
             }
+            */
             $num = 0;
-            $href = $this->url("elasticsearch/event/show", array('index' => $hit['_index'], 'type' => $hit['_type'], 'id' => $hit['_id']));
+            $href = $this->url("elasticsearch/event/show", array('index' => $hit->_index, 'type' => $hit->_type, 'id' => $hit->_id));
         ?>
             <tr class="document state <?= join(" ", $classes) ?>"
-                data-elastic-index="<?= $hit['_index'] ?>"
-                data-elastic-type="<?= $hit['_type'] ?>"
-                data-elastic-id="<?= $hit['_id'] ?>"
+                data-elastic-index="<?= $hit->_index ?>"
+                data-elastic-type="<?= $hit->_type ?>"
+                data-elastic-id="<?= $hit->_id ?>"
                 href="<?= $href ?>">
                 <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
-                    <td><?php $value = (array_key_exists($field, $hit) ? $hit[$field] : null);
+                    <td><?php $value = (array_key_exists($field, $hit) ? $hit->{$field} : null);
                         if ($value === null) $value = '&nbsp;';
                         else $value = $this->escape($value);
                         if ($num++ == 0): ?><a href="<?= $href ?>"><?= $value ?></a><?= join("", $icons) ?><?php
