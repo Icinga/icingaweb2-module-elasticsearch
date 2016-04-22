@@ -209,9 +209,6 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             'size'  => $query->hasLimit() ? $query->getLimit() : 10,
             'query' => $this->renderFilter($query->getFilter())
         );
-        if (($columns = $query->getColumns()) === null || !empty($columns)) {
-            $body['_source'] = $columns === null ? false : $columns;
-        }
         if ($query->hasOrder()) {
             $sort = array();
             foreach ($query->getOrder() as $order) {
@@ -221,15 +218,113 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             $body['sort'] = $sort;
         }
 
-        $request = new SearchApiRequest($query->getIndices(), $query->getTypes(), $body);
+        $fields = $query->getColumns();
+        if ($query->isSourceRetrievalDisabled()) {
+            $body['_source'] = false;
+        } elseif (! empty($fields)) {
+            $sourceFields = array();
+            foreach ($fields as $fieldName) {
+                if (substr($fieldName, 0, 1) !== '_') {
+                    $sourceFields[] = $fieldName;
+                }
+            }
 
-        $response = $this->request($request);
+            $body['_source'] = empty($sourceFields) ? false : $sourceFields;
+        }
+
+        $response = $this->request(new SearchApiRequest($query->getIndices(), $query->getTypes(), $body));
         if (! $response->isSuccess()) {
             throw new QueryException($this->renderErrorMessage($response));
         }
 
         $json = $response->json();
-        return $json['hits']['hits'];
+        $result = array();
+        foreach ($json['hits']['hits'] as $hit) {
+            $result[] = $this->createRow($hit, $fields);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Merge meta fields and source fields together and return them as simple object
+     *
+     * Applies column aliases and sets null for each missing attribute.
+     *
+     * @param   array   $hit
+     * @param   array   $requestedFields
+     *
+     * @return  object
+     */
+    public function createRow(array $hit, array $requestedFields)
+    {
+        // In case the hit contains attributes with a differing case than the requested fields, it is necessary
+        // to create another array to map attributes case insensitively to their requested counterparts.
+        // This does also apply the virtual alias handling. (Since Elasticsearch does not handle such)
+        $loweredFieldMap = array();
+        foreach ($requestedFields as $alias => $name) {
+            $loweredName = strtolower($name);
+            if (isset($loweredFieldMap[$loweredName])) {
+                if (! is_array($loweredFieldMap[$loweredName])) {
+                    $loweredFieldMap[$loweredName] = array($loweredFieldMap[$loweredName]);
+                }
+
+                $loweredFieldMap[$loweredName][] = is_string($alias) ? $alias : $name;
+            } else {
+                $loweredFieldMap[$loweredName] = is_string($alias) ? $alias : $name;
+            }
+        }
+
+        $source = null;
+        $fields = array();
+        foreach ($hit as $metaField => $metaValue) {
+            if ($metaField === '_source') {
+                $source = $metaValue;
+            } elseif (empty($loweredFieldMap)) {
+                $fields[$metaField] = $metaValue;
+            } elseif (isset($loweredFieldMap[strtolower($metaField)])) {
+                $requestedFieldName = $loweredFieldMap[strtolower($metaField)];
+                if (is_array($requestedFieldName)) {
+                    foreach ($requestedFieldName as $requestedName) {
+                        $fields[$requestedName] = $metaValue;
+                    }
+                } else {
+                    $fields[$requestedFieldName] = $metaValue;
+                }
+            }
+        }
+
+        if (! empty($source)) {
+            foreach ($source as $fieldName => $fieldValue) {
+                if (empty($loweredFieldMap)) {
+                    $fields[$fieldName] = $fieldValue;
+                } elseif (isset($loweredFieldMap[strtolower($fieldName)])) {
+                    // TODO: What about wildcard patterns?
+                    $requestedFieldName = $loweredFieldMap[strtolower($fieldName)];
+                    if (is_array($requestedFieldName)) {
+                        foreach ($requestedFieldName as $requestedName) {
+                            $fields[$requestedName] = $fieldValue;
+                        }
+                    } else {
+                        $fields[$requestedFieldName] = $fieldValue;
+                    }
+                }
+            }
+        }
+
+        // The hit may not contain all requested fields, so populate the
+        // fields with the missing ones and their value being set to null
+        foreach ($requestedFields as $alias => $name) {
+            if (! is_string($alias)) {
+                $alias = $name;
+            }
+
+            if (! array_key_exists($alias, $fields)) {
+                $fields[$alias] = null;
+            }
+        }
+
+        return (object) $fields;
     }
 
     /**
