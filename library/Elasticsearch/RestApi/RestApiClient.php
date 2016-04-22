@@ -572,9 +572,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         try {
             $errorDocument = $response->json();
         } catch (IcingaException $e) {
-            return sprintf('Elasticsearch non-json error %s (%s): %s',
-                $response->getStatusCode(),
-                $response->getContentType(),
+            return sprintf('%s: %s',
+                $e->getMessage(),
                 $response->getPayload()
             );
         }
@@ -586,10 +585,15 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             );
         }
 
-        return sprintf('Elasticsearch json error %s: %s',
-            $response->getStatusCode(),
-            json_encode($errorDocument['error'])
-        );
+        if (is_array($errorDocument)) {
+            return sprintf('Elasticsearch json error %s: %s',
+                $response->getStatusCode(),
+                json_encode($errorDocument['error'])
+            );
+        }
+        else {
+            return $response->getPayload();
+        }
     }
 
     /**
