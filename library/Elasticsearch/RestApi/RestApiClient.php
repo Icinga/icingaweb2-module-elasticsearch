@@ -204,35 +204,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      */
     public function fetchAll(RestApiQuery $query)
     {
-        $body = array(
-            'from'  => $query->getOffset() ?: 0,
-            'size'  => $query->hasLimit() ? $query->getLimit() : 10,
-            'query' => $this->renderFilter($query->getFilter())
-        );
-        if ($query->hasOrder()) {
-            $sort = array();
-            foreach ($query->getOrder() as $order) {
-                $sort[] = array($order[0] => strtolower($order[1]));
-            }
-
-            $body['sort'] = $sort;
-        }
-
-        $fields = $query->getColumns();
-        if ($query->isSourceRetrievalDisabled()) {
-            $body['_source'] = false;
-        } elseif (! empty($fields)) {
-            $sourceFields = array();
-            foreach ($fields as $fieldName) {
-                if (substr($fieldName, 0, 1) !== '_') {
-                    $sourceFields[] = $fieldName;
-                }
-            }
-
-            $body['_source'] = empty($sourceFields) ? false : $sourceFields;
-        }
-
-        $response = $this->request(new SearchApiRequest($query->getIndices(), $query->getTypes(), $body));
+        $response = $this->request($query->createSearchRequest());
         if (! $response->isSuccess()) {
             throw new QueryException($this->renderErrorMessage($response));
         }
@@ -240,7 +212,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         $json = $response->json();
         $result = array();
         foreach ($json['hits']['hits'] as $hit) {
-            $result[] = $this->createRow($hit, $fields);
+            $result[] = $this->createRow($hit, $query->getColumns());
         }
 
         return $result;

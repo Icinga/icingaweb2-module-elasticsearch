@@ -8,6 +8,16 @@ use Icinga\Data\SimpleQuery;
 class RestApiQuery extends SimpleQuery
 {
     /**
+     * The default offset used by search requests
+     */
+    const DEFAULT_OFFSET = 0;
+
+    /**
+     * The default limit used by search requests
+     */
+    const DEFAULT_LIMIT = 10;
+
+    /**
      * The patterns defining the indices where to search for documents
      *
      * @var array
@@ -106,5 +116,43 @@ class RestApiQuery extends SimpleQuery
     {
         $this->setTypes(array($target));
         return parent::from($target, $fields);
+    }
+
+    /**
+     * Create and return a new instance of SearchApiRequest for this query
+     *
+     * @return  SearchApiRequest
+     */
+    public function createSearchRequest()
+    {
+        $body = array(
+            'from'  => $this->getOffset() ?: static::DEFAULT_OFFSET,
+            'size'  => $this->hasLimit() ? $this->getLimit() : static::DEFAULT_LIMIT,
+            'query' => $this->ds->renderFilter($this->getFilter())
+        );
+        if ($this->hasOrder()) {
+            $sort = array();
+            foreach ($this->getOrder() as $order) {
+                $sort[] = array($order[0] => strtolower($order[1]));
+            }
+
+            $body['sort'] = $sort;
+        }
+
+        $fields = $this->getColumns();
+        if ($this->isSourceRetrievalDisabled()) {
+            $body['_source'] = false;
+        } elseif (! empty($fields)) {
+            $sourceFields = array();
+            foreach ($fields as $fieldName) {
+                if (substr($fieldName, 0, 1) !== '_') {
+                    $sourceFields[] = $fieldName;
+                }
+            }
+
+            $body['_source'] = empty($sourceFields) ? false : $sourceFields;
+        }
+
+        return new SearchApiRequest($this->getIndices(), $this->getTypes(), $body);
     }
 }
