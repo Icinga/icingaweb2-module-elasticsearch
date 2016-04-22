@@ -4,10 +4,11 @@
 namespace Icinga\Module\Elasticsearch\Controllers;
 
 use Icinga\Exception\IcingaException;
-
 use Icinga\Exception\NotImplementedError;
+
 use Icinga\Module\Elasticsearch\Controller;
 
+use Icinga\Module\Elasticsearch\EventBackend;
 use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
 use Icinga\Module\Elasticsearch\Event;
 
@@ -30,25 +31,20 @@ class EventController extends Controller
     public function searchAction()
     {
         $client = new RestApiClient($this->elasticsearch_url);
-        $query = $client->select(array($this->index_pattern));
+        $repository = new EventBackend($client);
+        $repository->setIndex($this->index_pattern);
 
-        // TODO: use ElasticsearchRepository for columns
+        if ($type = $this->getParam('type')) {
+            $repository->setBaseTable($type);
+        }
+
+        $query = $repository->select();
+
         /** @var FilterEditor $editor */
         $editor = Widget::create('filterEditor');
         $editor->setQuery($query)
-               ->setSearchColumns(array('message')) // TODO
-               ->preserveParams('sort', 'dir', 'limit')
+               ->preserveParams('sort', 'dir', 'limit', 'fields', 'type')
                ->ignoreParams('page')
-               ->setColumns(array( // TODO
-                   'logsource',
-                   'host',
-                   'program',
-                   'message',
-                   'severity',
-                   'severity_label',
-                   'facility',
-                   'facility_label',
-               ))
                ->handleRequest($this->getRequest());
 
         $this->view->filterEditor = $editor;

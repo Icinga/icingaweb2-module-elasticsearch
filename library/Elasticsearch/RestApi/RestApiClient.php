@@ -4,6 +4,7 @@
 namespace Icinga\Module\Elasticsearch\RestApi;
 
 use ArrayIterator;
+use Icinga\Application\Benchmark;
 use LogicException;
 use Icinga\Data\Extensible;
 use Icinga\Data\Filter\Filter;
@@ -154,8 +155,12 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     public function select(array $indices = null, array $types = null)
     {
         $query = new RestApiQuery($this);
-        $query->setIndices($indices);
-        $query->setTypes($types);
+        if ($indices !== null) {
+            $query->setIndices($indices);
+        }
+        if ($types !== null) {
+            $query->setTypes($types);
+        }
         return $query;
     }
 
@@ -598,5 +603,69 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     {
         $renderer = new FilterRenderer($filter);
         return $renderer->getQuery();
+    }
+
+    /**
+     * Retrieve columns from the Elasticsearch indices.
+     *
+     * It will get you a merged list of columns available over the specified indices and types.
+     *
+     * @param   string  $index  The index or index pattern to get
+     * @param   array   $types  An array of types to get columns for
+     *
+     * @throws  QueryException  When Elasticsearch returns an error
+     *
+     * @return  array           A list of column names
+     *
+     * @todo    Do a cached retrieval?
+     */
+    public function fetchColumns($index, $types = array())
+    {
+        Benchmark::measure('Retrieving columns for types: ' . (!empty($types) ? join(', ', $types) : '(all)'));
+        $request = new MappingApiRequest($index, $types);
+
+        $response = $this->request($request);
+        if (! $response->isSuccess()) {
+            if ($response->getStatusCode() === 404) {
+                return false;
+            }
+
+            throw new QueryException($this->renderErrorMessage($response));
+        }
+
+        // initialize with interal columns
+        $columns = array(
+            '_index',
+            '_type',
+            '_id',
+        );
+
+        foreach ($response->json() as $index => $mappings) {
+            if (! array_key_exists('mappings', $mappings)) {
+                continue;
+            }
+            foreach ($mappings['mappings'] as $type) {
+                if (! array_key_exists('properties', $type)) {
+                    continue;
+                }
+                foreach ($type['properties'] as $column => $detail) {
+                    if ($column === '@version') {
+                        continue;
+                    }
+                    if (array_key_exists('properties', $detail)) {
+                        // ignore structured types
+                        // TODO: support this later?
+                        continue;
+                    }
+                    if (! in_array($column, $columns)) {
+                        $columns[] = $column;
+                    }
+                }
+
+            }
+        }
+        Benchmark::measure('Finished retrieving columns');
+
+        return $columns;
     }
 }
