@@ -22,6 +22,13 @@ class RestApiQuery extends SimpleQuery
     protected $types;
 
     /**
+     * Whether _source retrieval is disabled
+     *
+     * @var bool
+     */
+    protected $disabledSource;
+
+    /**
      * Set the patterns defining the indices where to search for documents
      *
      * @param   array   $indices
@@ -65,6 +72,29 @@ class RestApiQuery extends SimpleQuery
     public function getTypes()
     {
         return $this->types;
+    }
+
+    /**
+     * Set whether _source retrieval is disabled
+     *
+     * @param   bool    $state
+     *
+     * @return  $this
+     */
+    public function disableSourceRetrieval($state)
+    {
+        $this->disabledSource = (bool) $state;
+        return $this;
+    }
+
+    /**
+     * Return whether _source retrieval is disabled
+     *
+     * @return  bool
+     */
+    public function isSourceRetrievalDisabled()
+    {
+        return $this->disabledSource ?: false;
     }
 
     /**
