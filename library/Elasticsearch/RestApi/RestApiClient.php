@@ -155,8 +155,12 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     public function select(array $indices = null, array $types = null)
     {
         $query = new RestApiQuery($this);
-        $query->setIndices($indices);
-        $query->setTypes($types);
+        if ($indices !== null) {
+            $query->setIndices($indices);
+        }
+        if ($types !== null) {
+            $query->setTypes($types);
+        }
         return $query;
     }
 
