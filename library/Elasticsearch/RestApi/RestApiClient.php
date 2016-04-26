@@ -539,14 +539,10 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @throws  StatementException
      *
-     * @todo    Add support for filters and bulk deletions
+     * @todo    Add support for bulk deletions
      */
     public function delete($target, Filter $filter = null)
     {
-        if ($filter !== null) {
-            throw new NotImplementedError('Delete requests with filter are not supported yet');
-        }
-
         if (is_string($target)) {
             $target = explode('/', $target);
         }
@@ -567,8 +563,22 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 throw new LogicException('Invalid target "%s"', join('/', $target));
         }
 
+        if ($id !== null) {
+            $request = new DeleteApiRequest($index, $documentType, $id);
+        } elseif ($filter !== null) {
+            $query = new RestApiQuery($this, array('_id'));
+            $ids = $query->setFilter($filter)->fetchColumn();
+            if (empty($ids)) {
+                throw new StatementException('No documents found');
+            } elseif (count($ids) == 1) {
+                $request = new DeleteApiRequest($index, $documentType, $ids[0]);
+            } else {
+                throw new NotImplementedError('Bulk deletions are not supported yet');
+            }
+        }
+
         try {
-            $response = $this->request(new DeleteApiRequest($index, $documentType, $id));
+            $response = $this->request($request);
         } catch (RestApiException $e) {
             throw new StatementException(
                 'Failed to delete document "%s". An error occurred: %s',
