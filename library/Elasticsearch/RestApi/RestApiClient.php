@@ -409,12 +409,13 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @param   string|array    $target
      * @param   array           $data
+     * @param   bool            $refresh    Whether to refresh the index
      *
      * @return  bool                    Whether the document has been created or not
      *
      * @throws  StatementException
      */
-    public function insert($target, array $data)
+    public function insert($target, array $data, $refresh = true)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -432,8 +433,13 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 throw new LogicException('Invalid target "%s"', join('/', $target));
         }
 
+        $request = new IndexApiRequest($index, $documentType, $id, $data);
+        if ($refresh) {
+            $request->getParams()->add('refresh');
+        }
+
         try {
-            $response = $this->request(new IndexApiRequest($index, $documentType, $id, $data));
+            $response = $this->request($request);
         } catch (RestApiException $e) {
             throw new StatementException(
                 'Failed to index document "%s". An error occurred: %s',
