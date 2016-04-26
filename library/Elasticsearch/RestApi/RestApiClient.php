@@ -467,14 +467,10 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @throws  StatementException
      *
-     * @todo    Add support for filters and bulk updates
+     * @todo    Add support for bulk updates
      */
     public function update($target, array $data, Filter $filter = null)
     {
-        if ($filter !== null) {
-            throw new NotImplementedError('Update requests with filter are not supported yet');
-        }
-
         if (is_string($target)) {
             $target = explode('/', $target);
         }
@@ -495,8 +491,21 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 throw new LogicException('Invalid target "%s"', join('/', $target));
         }
 
-        $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => $data));
-        $request->getParams()->add('fields', '_source');
+        if ($id !== null) {
+            $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => $data));
+            $request->getParams()->add('fields', '_source');
+        } elseif ($filter !== null) {
+            $query = new RestApiQuery($this, array('_id'));
+            $ids = $query->setFilter($filter)->fetchColumn();
+            if (empty($ids)) {
+                throw new StatementException('No documents found');
+            } elseif (count($ids) == 1) {
+                $request = new UpdateApiRequest($index, $documentType, $ids[0], array('doc' => $data));
+                $request->getParams()->add('fields', '_source');
+            } else {
+                throw new NotImplementedError('Bulk updates are not supported yet');
+            }
+        }
 
         try {
             $response = $this->request($request);
