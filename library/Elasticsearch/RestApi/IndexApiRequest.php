@@ -13,6 +13,18 @@ class IndexApiRequest extends DocumentApiRequest
     /**
      * {@inheritdoc}
      */
+    public function setPayload($data, $contentType = null)
+    {
+        if (empty($data)) {
+            $data = (object) $data;
+        }
+
+        return parent::setPayload($data, $contentType);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function createPath()
     {
         if ($this->id === null) {
