@@ -325,10 +325,27 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   RestApiQuery    $query
      *
      * @return  array
+     *
+     * @throws  LogicException      In case no attribute is being requested
      */
     public function fetchColumn(RestApiQuery $query)
     {
-        throw new NotImplementedError('RestApiClient::fetchColumn() is not implemented yet');
+        $fields = $query->getColumns();
+        if (empty($fields)) {
+            throw new LogicException('You must request at least one attribute when fetching a single field');
+        }
+
+        $results = $this->fetchAll($query);
+        $alias = key($fields);
+        $field = is_int($alias) ? current($fields) : $alias;
+        $values = array();
+        foreach ($results as $document) {
+            if (isset($document->$field)) {
+                $values[] = $document->$field;
+            }
+        }
+
+        return $values;
     }
 
     /**
