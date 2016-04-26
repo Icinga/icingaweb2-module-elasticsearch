@@ -468,6 +468,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   string|array    $target
      * @param   array           $data
      * @param   Filter          $filter
+     * @param   bool            $refresh    Whether to refresh the index
      *
      * @return  array   The updated document
      *
@@ -475,7 +476,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @todo    Add support for bulk updates
      */
-    public function update($target, array $data, Filter $filter = null)
+    public function update($target, array $data, Filter $filter = null, $refresh = true)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -511,6 +512,10 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             } else {
                 throw new NotImplementedError('Bulk updates are not supported yet');
             }
+        }
+
+        if ($refresh) {
+            $request->getParams()->add('refresh');
         }
 
         try {
