@@ -250,18 +250,4 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
 
         return parent::resolveQueryColumnAlias($table, $alias);
     }
-
-    /**
-     * Validate that the given field is a valid query target and return it or the actual name if it's an alias
-     *
-     * {@inheritdoc} Returns the field unchanged and without any validation if it's a false value.
-     */
-    public function requireQueryColumn($table, $name, RepositoryQuery $query = null)
-    {
-        if (in_array($name, array('false', 'off', 'no', '0'))) {
-            return $name;
-        }
-
-        return parent::requireQueryColumn($table, $name, $query);
-    }
 }
