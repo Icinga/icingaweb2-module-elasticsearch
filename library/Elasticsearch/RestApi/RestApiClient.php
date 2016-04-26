@@ -547,12 +547,13 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @param   string|array    $target
      * @param   Filter          $filter
+     * @param   bool            $refresh    Whether to refresh the index
      *
      * @throws  StatementException
      *
      * @todo    Add support for bulk deletions
      */
-    public function delete($target, Filter $filter = null)
+    public function delete($target, Filter $filter = null, $refresh = true)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -586,6 +587,10 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             } else {
                 throw new NotImplementedError('Bulk deletions are not supported yet');
             }
+        }
+
+        if ($refresh) {
+            $request->getParams()->add('refresh');
         }
 
         try {
