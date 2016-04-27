@@ -382,7 +382,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   string  $id             The id of the document to fetch
      * @param   array   $fields         The desired fields to return instead of all fields
      *
-     * @return  array|false             Returns false in case no document could be found
+     * @return  object|false            Returns false in case no document could be found
      */
     public function fetchDocument($index, $documentType, $id, array $fields = null)
     {
@@ -401,7 +401,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         }
 
         $json = $response->json();
-        return $json['_source'];
+        return $this->createRow($json, $fields ?: array());
     }
 
     /**

@@ -5,7 +5,6 @@ namespace Icinga\Module\Elasticsearch;
 use Exception;
 use Icinga\Exception\IcingaException;
 use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
-use stdClass;
 
 /**
  * @todo reimplement?
@@ -20,7 +19,7 @@ class Event
     protected $id;
 
     protected $found = false;
-    protected $source;
+    protected $document;
 
     public function __construct(RestApiClient $client)
     {
@@ -35,7 +34,7 @@ class Event
         $result = $this->client->fetchDocument($this->index, $this->type, $this->id);
 
         if ($result !== false) {
-            $this->source = $result;
+            $this->document = $result;
             return $this;
         }
         else return false;
@@ -99,11 +98,11 @@ class Event
     }
 
     /**
-     * @return array
+     * @return  object
      */
-    public function getSource()
+    public function getDocument()
     {
-        return $this->source;
+        return $this->document;
     }
 
     /**
@@ -112,7 +111,7 @@ class Event
      * @throws Exception
      */
     public function update_partial(Array $data) {
-        if ($this->source === null)
+        if ($this->document === null)
             throw new IcingaException("document must have been fetched before!");
 
         if (!$this->index or !$this->type or !$this->id)

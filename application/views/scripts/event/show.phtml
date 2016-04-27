@@ -8,7 +8,7 @@
     <?php if ($this->event === null): ?>
         <p>Document not found!</p>
     <?php else:
-        $source = $this->event->getSource();
+        $document = $this->event->getDocument();
     ?>
 
         <table class="event_detail">
@@ -26,12 +26,12 @@
             </tr>
             <tr>
                 <th>Timestamp</th>
-                <td><?= $this->escape($source['@timestamp']) ?></td>
+                <td><?= $this->escape($document->{'@timestamp'}) ?></td>
             </tr>
             <tr>
                 <td colspan="2">&nbsp;</td>
             </tr>
-            <?php foreach($source as $key => $value):
+            <?php foreach($document as $key => $value):
                 if (substr($key, 0, 1) == '@' or $key == 'type') continue;
             ?>
             <tr>

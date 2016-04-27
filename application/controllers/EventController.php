@@ -177,9 +177,9 @@ class EventController extends Controller
             throw new IcingaException("Event not found! index=%s type=%s id=%s", $index, $type, $id);
         }
 
-        $source = $event->getSource();
-        if (array_key_exists('icinga_comments', $source)) {
-            $data['icinga_comments'] = array_merge($source['icinga_comments'], $data['icinga_comments']);
+        $document = $event->getDocument();
+        if (isset($document->icinga_comments)) {
+            $data['icinga_comments'] = array_merge($document->icinga_comments, $data['icinga_comments']);
         }
 
         $event->update_partial($data);
