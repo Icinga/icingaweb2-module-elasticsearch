@@ -31,7 +31,7 @@ class Event
         if (!$this->index or !$this->type or !$this->id)
             throw new Exception("index, type and id must be set for fetching!");
 
-        $result = $this->client->fetchDocument($this->index, $this->type, $this->id);
+        $result = $this->client->fetchDocument($this->index, $this->type, $this->id, array('_source'));
 
         if ($result !== false) {
             $this->document = $result;

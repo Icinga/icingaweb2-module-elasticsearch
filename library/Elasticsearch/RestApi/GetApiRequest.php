@@ -13,6 +13,36 @@ class GetApiRequest extends DocumentApiRequest
     protected $method = 'GET';
 
     /**
+     * Whether to only fetch the source
+     *
+     * @var bool
+     */
+    protected $sourceOnly;
+
+    /**
+     * Set whether to only fetch the source
+     *
+     * @param   bool    $state
+     *
+     * @return  $this
+     */
+    public function setSourceOnly($state = true)
+    {
+        $this->sourceOnly = (bool) $state;
+        return $this;
+    }
+
+    /**
+     * Return whether to only fetch the source
+     *
+     * @return  bool
+     */
+    public function getSourceOnly()
+    {
+        return $this->sourceOnly ?: false;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function createPath()
@@ -21,6 +51,11 @@ class GetApiRequest extends DocumentApiRequest
             throw new LogicException('GetApiRequest is missing a document id');
         }
 
-        return sprintf('/%s/%s/%s', $this->index, $this->documentType, $this->id);
+        $path = sprintf('/%s/%s/%s', $this->index, $this->documentType, $this->id);
+        if ($this->getSourceOnly()) {
+            $path .= '/_source';
+        }
+
+        return $path;
     }
 }

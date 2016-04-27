@@ -377,6 +377,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     /**
      * Fetch and return the given document
      *
+     * In case you are only interested in the source, pass "_source" as the only desired field.
+     *
      * @param   string  $index          The index the document is located in
      * @param   string  $documentType   The type of the document to fetch
      * @param   string  $id             The id of the document to fetch
@@ -388,7 +390,12 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     {
         $request = new GetApiRequest($index, $documentType, $id);
         if (! empty($fields)) {
-            $request->getParams()->add('_source', join(',', $fields));
+            if (count($fields) == 1 && $fields[0] === '_source') {
+                $request->setSourceOnly();
+                $fields = null;
+            } else {
+                $request->getParams()->add('_source', join(',', $fields));
+            }
         }
 
         $response = $this->request($request);
