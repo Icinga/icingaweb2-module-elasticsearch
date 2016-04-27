@@ -10,6 +10,7 @@ use Icinga\Data\Extensible;
 use Icinga\Data\Filter\Filter;
 use Icinga\Data\Reducible;
 use Icinga\Data\Updatable;
+use Icinga\Exception\StatementException;
 use Icinga\Repository\Repository;
 use Icinga\Repository\RepositoryQuery;
 use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
@@ -155,10 +156,13 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      *
      * @param   string|array    $documentType
      * @param   array           $document
+     * @param   bool            $refresh        Whether to refresh the index
      *
      * @return  bool    Whether the document has been created or not
+     *
+     * @throws  StatementException
      */
-    public function insert($documentType, array $document)
+    public function insert($documentType, array $document, $refresh = true)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -167,7 +171,8 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
         $this->requireTable($documentType);
         return $this->ds->insert(
             $this->applyIndex($documentType),
-            $this->requireStatementColumns($this->extractDocumentType($documentType), $document)
+            $this->requireStatementColumns($this->extractDocumentType($documentType), $document),
+            $refresh
         );
     }
 
@@ -177,10 +182,13 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      * @param   string|array    $documentType
      * @param   array           $document
      * @param   Filter          $filter
+     * @param   bool            $refresh        Whether to refresh the index
      *
      * @return  array   The updated document
+     *
+     * @throws  StatementException
      */
-    public function update($documentType, array $document, Filter $filter = null)
+    public function update($documentType, array $document, Filter $filter = null, $refresh = true)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -195,7 +203,8 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
         return $this->ds->update(
             $this->applyIndex($documentType),
             $this->requireStatementColumns($this->extractDocumentType($documentType), $document),
-            $filter
+            $filter,
+            $refresh
         );
     }
 
@@ -204,8 +213,11 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      *
      * @param   string|array    $documentType
      * @param   Filter          $filter
+     * @param   bool            $refresh        Whether to refresh the index
+     *
+     * @throws  StatementException
      */
-    public function delete($documentType, Filter $filter = null)
+    public function delete($documentType, Filter $filter = null, $refresh = true)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -217,7 +229,7 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
             $filter = $this->requireFilter($this->extractDocumentType($documentType), $filter);
         }
 
-        return $this->ds->delete($this->applyIndex($documentType), $filter);
+        return $this->ds->delete($this->applyIndex($documentType), $filter, $refresh);
     }
 
     /**
