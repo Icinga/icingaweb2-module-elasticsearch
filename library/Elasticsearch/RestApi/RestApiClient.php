@@ -507,7 +507,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         }
 
         if ($id !== null) {
-            $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => $data));
+            $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => (object) $data));
             if ($fetchSource) {
                 $request->getParams()->add('fields', '_source');
             }
@@ -517,7 +517,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             if (empty($ids)) {
                 throw new StatementException('No documents found');
             } elseif (count($ids) == 1) {
-                $request = new UpdateApiRequest($index, $documentType, $ids[0], array('doc' => $data));
+                $request = new UpdateApiRequest($index, $documentType, $ids[0], array('doc' => (object) $data));
                 if ($fetchSource) {
                     $request->getParams()->add('fields', '_source');
                 }
