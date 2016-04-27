@@ -183,12 +183,13 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      * @param   array           $document
      * @param   Filter          $filter
      * @param   bool            $refresh        Whether to refresh the index
+     * @param   bool            $fetchSource    Whether to include the updated document in the result
      *
      * @return  array   The updated document
      *
      * @throws  StatementException
      */
-    public function update($documentType, array $document, Filter $filter = null, $refresh = true)
+    public function update($documentType, array $document, Filter $filter = null, $refresh = true, $fetchSource = true)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -204,7 +205,8 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
             $this->applyIndex($documentType),
             $this->requireStatementColumns($this->extractDocumentType($documentType), $document),
             $filter,
-            $refresh
+            $refresh,
+            $fetchSource
         );
     }
 

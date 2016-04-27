@@ -475,7 +475,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   string|array    $target
      * @param   array           $data
      * @param   Filter          $filter
-     * @param   bool            $refresh    Whether to refresh the index
+     * @param   bool            $refresh        Whether to refresh the index
+     * @param   bool            $fetchSource    Whether to include the updated document in the result
      *
      * @return  array   The updated document
      *
@@ -483,7 +484,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @todo    Add support for bulk updates
      */
-    public function update($target, array $data, Filter $filter = null, $refresh = true)
+    public function update($target, array $data, Filter $filter = null, $refresh = true, $fetchSource = true)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -507,7 +508,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         if ($id !== null) {
             $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => $data));
-            $request->getParams()->add('fields', '_source');
+            if ($fetchSource) {
+                $request->getParams()->add('fields', '_source');
+            }
         } elseif ($filter !== null) {
             $query = new RestApiQuery($this, array('_id'));
             $ids = $query->setFilter($filter)->fetchColumn();
@@ -515,7 +518,9 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 throw new StatementException('No documents found');
             } elseif (count($ids) == 1) {
                 $request = new UpdateApiRequest($index, $documentType, $ids[0], array('doc' => $data));
-                $request->getParams()->add('fields', '_source');
+                if ($fetchSource) {
+                    $request->getParams()->add('fields', '_source');
+                }
             } else {
                 throw new NotImplementedError('Bulk updates are not supported yet');
             }
