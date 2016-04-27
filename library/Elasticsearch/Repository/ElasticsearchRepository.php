@@ -185,7 +185,7 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      * @param   bool            $refresh        Whether to refresh the index
      * @param   bool            $fetchSource    Whether to include the updated document in the result
      *
-     * @return  array   The updated document
+     * @return  array   The response for the requested update
      *
      * @throws  StatementException
      */

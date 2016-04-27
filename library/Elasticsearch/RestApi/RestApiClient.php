@@ -478,7 +478,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   bool            $refresh        Whether to refresh the index
      * @param   bool            $fetchSource    Whether to include the updated document in the result
      *
-     * @return  array   The updated document
+     * @return  array   The response for the requested update
      *
      * @throws  StatementException
      *
@@ -548,8 +548,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             );
         }
 
-        $json = $response->json();
-        return $json['get']['_source'];
+        return $response->json();
     }
 
     /**
