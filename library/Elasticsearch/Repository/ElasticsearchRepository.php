@@ -125,8 +125,19 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
         }
 
         $fields = array();
-        foreach ($desiredFields as $field) {
-            $fields[] = $this->requireQueryColumn($documentType, $field);
+        foreach ($desiredFields as $customAlias => $fieldAlias) {
+            $fieldName = $this->requireQueryColumn($documentType, $fieldAlias);
+            if ($fieldName !== $fieldAlias) {
+                if (is_string($customAlias)) {
+                    $fields[$customAlias] = $fieldName;
+                } else {
+                    $fields[$fieldAlias] = $fieldName;
+                }
+            } elseif (is_string($customAlias)) {
+                $fields[$customAlias] = $fieldName;
+            } else {
+                $fields[] = $fieldName;
+            }
         }
 
         return $fields;
