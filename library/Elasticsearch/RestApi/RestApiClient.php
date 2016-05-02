@@ -92,6 +92,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     protected function createConnection()
     {
         $curl = curl_init();
+        curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_FAILONERROR, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
@@ -135,7 +136,20 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             throw $restApiException;
         }
 
-        $response = new RestApiResponse(curl_getinfo($curl, CURLINFO_HTTP_CODE));
+        $header = substr($result, 0, curl_getinfo($curl, CURLINFO_HEADER_SIZE));
+        $result = substr($result, curl_getinfo($curl, CURLINFO_HEADER_SIZE));
+
+        $statusCode = 0;
+        foreach (explode("\r\n", $header) as $headerLine) {
+            // The headers are inspected manually because curl_getinfo($curl, CURLINFO_HTTP_CODE)
+            // returns only the first status code. (e.g. 100 instead of 200)
+            $matches = array();
+            if (preg_match('/^HTTP\/[0-9.]+ ([0-9]+)/', $headerLine, $matches)) {
+                $statusCode = (int) $matches[1];
+            }
+        }
+
+        $response = new RestApiResponse($statusCode);
         if ($result) {
             $response->setPayload($result);
             $response->setContentType(curl_getinfo($curl, CURLINFO_CONTENT_TYPE));
