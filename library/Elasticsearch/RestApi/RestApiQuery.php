@@ -155,4 +155,22 @@ class RestApiQuery extends SimpleQuery
 
         return new SearchApiRequest($this->getIndices(), $this->getTypes(), $body);
     }
+
+    /**
+     * Create and return a result set for the given search response
+     *
+     * @param   RestApiResponse     $response
+     *
+     * @return  array
+     */
+    public function createSearchResult(RestApiResponse $response)
+    {
+        $json = $response->json();
+        $result = array();
+        foreach ($json['hits']['hits'] as $hit) {
+            $result[] = $this->ds->createRow($hit, $this->getColumns());
+        }
+
+        return $result;
+    }
 }

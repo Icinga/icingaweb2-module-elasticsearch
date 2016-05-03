@@ -228,13 +228,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             throw new QueryException($this->renderErrorMessage($response));
         }
 
-        $json = $response->json();
-        $result = array();
-        foreach ($json['hits']['hits'] as $hit) {
-            $result[] = $this->createRow($hit, $query->getColumns());
-        }
-
-        return $result;
+        return $query->createSearchResult($response);
     }
 
     /**
