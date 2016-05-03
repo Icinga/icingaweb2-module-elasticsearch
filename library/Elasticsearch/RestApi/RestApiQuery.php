@@ -119,6 +119,33 @@ class RestApiQuery extends SimpleQuery
     }
 
     /**
+     * Create and return a new instance of CountApiRequest for this query
+     *
+     * @return  CountApiRequest
+     */
+    public function createCountRequest()
+    {
+        return new CountApiRequest(
+            $this->getIndices(),
+            $this->getTypes(),
+            array('query' => $this->ds->renderFilter($this->getFilter()))
+        );
+    }
+
+    /**
+     * Create and return the result for the given count response
+     *
+     * @param   RestApiResponse     $response
+     *
+     * @return  int
+     */
+    public function createCountResult(RestApiResponse $response)
+    {
+        $json = $response->json();
+        return $json['count'];
+    }
+
+    /**
      * Create and return a new instance of SearchApiRequest for this query
      *
      * @return  SearchApiRequest

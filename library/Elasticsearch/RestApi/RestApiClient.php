@@ -199,19 +199,12 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      */
     public function count(RestApiQuery $query)
     {
-        $request = new CountApiRequest(
-            $query->getIndices(),
-            $query->getTypes(),
-            array('query' => $this->renderFilter($query->getFilter()))
-        );
-
-        $response = $this->request($request);
+        $response = $this->request($query->createCountRequest());
         if (! $response->isSuccess()) {
             throw new QueryException($this->renderErrorMessage($response));
         }
 
-        $json = $response->json();
-        return $json['count'];
+        return $query->createCountResult($response);
     }
 
     /**
