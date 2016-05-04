@@ -183,12 +183,11 @@ class FilterRenderer {
 
             if ($sign === '=' || $sign === '!=') {
                 return array(
-                    'match' => array(
-                        $column => array(
-                            'query' => trim(str_replace('*', ' ', $value)),
-                            'operator' => 'and',
-                        ),
-                    ),
+                    'query_string' => array(
+                        'default_field'     => $column,
+                        'query'             => $value,
+                        'analyze_wildcard'  => true
+                    )
                 );
 
             }
