@@ -677,15 +677,14 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             );
         }
 
-        if (is_array($errorDocument)) {
-            return sprintf('Elasticsearch json error %s: %s',
-                $response->getStatusCode(),
-                json_encode($errorDocument['error'])
-            );
+        if (is_string($errorDocument['error'])) {
+            return $errorDocument['error'];
         }
-        else {
-            return $response->getPayload();
-        }
+
+        return sprintf('Elasticsearch json error %s: %s',
+            $response->getStatusCode(),
+             json_encode($errorDocument['error'])
+        );
     }
 
     /**
