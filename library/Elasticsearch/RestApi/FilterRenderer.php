@@ -157,9 +157,10 @@ class FilterRenderer {
         if (is_array($value)) {
             if ($sign === '=' || $sign === '!=') {
                 return array(
-                    'terms' => array(
-                        $column => $value,
-                    ),
+                    'query_string' => array(
+                        'default_field' => $column,
+                        'query'         => '"' . join('" "', $value) . '"'
+                    )
                 );
             }
 
