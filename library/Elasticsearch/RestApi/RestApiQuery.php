@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\Elasticsearch\RestApi;
 
+use LogicException;
 use Icinga\Data\SimpleQuery;
 
 class RestApiQuery extends SimpleQuery
@@ -37,6 +38,13 @@ class RestApiQuery extends SimpleQuery
      * @var bool
      */
     protected $disabledSource;
+
+    /**
+     * The name of the field used to unfold the result
+     *
+     * @var string
+     */
+    protected $unfoldAttribute;
 
     /**
      * Set the patterns defining the indices where to search for documents
@@ -108,6 +116,68 @@ class RestApiQuery extends SimpleQuery
     }
 
     /**
+     * Set the field to be used to unfold the result
+     *
+     * @param   string  $field
+     *
+     * @return  $this
+     */
+    public function setUnfoldAttribute($field)
+    {
+        $this->unfoldAttribute = $field;
+        return $this;
+    }
+
+    /**
+     * Return the field to use to unfold the result
+     *
+     * @return  string
+     */
+    public function getUnfoldAttribute()
+    {
+        return $this->unfoldAttribute;
+    }
+
+    /**
+     * Return the limit for this query
+     *
+     * This will return a modified version of the actual limit in case attribute unfolding has been enabled.
+     *
+     * @param   bool    $ignoreUnfoldAttribute      Pass true to return the actual limit
+     *
+     * @return int|null
+     */
+    public function getLimit($ignoreUnfoldAttribute = false)
+    {
+        if ($this->unfoldAttribute === null || $ignoreUnfoldAttribute || !$this->hasOffset()) {
+            return parent::getLimit();
+        } elseif ($this->hasLimit()) {
+            $limit = ($this->limitOffset / $this->limitCount + 1) * $this->limitCount;
+            if ($this->peekAhead) {
+                $limit += 1;
+            }
+
+            return $limit;
+        } else {
+            return $this->limitCount;
+        }
+    }
+
+    /**
+     * Return the offset for this query
+     *
+     * This will return a offset of zero in case attribute unfolding has been enabled.
+     *
+     * @param   bool    $ignoreUnfoldAttribute      Pass true to return the actual limit
+     *
+     * @return int|null
+     */
+    public function getOffset($ignoreUnfoldAttribute = false)
+    {
+        return $this->unfoldAttribute === null || $ignoreUnfoldAttribute ? parent::getOffset() : 0;
+    }
+
+    /**
      * Choose a document type and the fields you are interested in
      *
      * {@inheritdoc} This registers the given target as type filter.
@@ -125,11 +195,42 @@ class RestApiQuery extends SimpleQuery
      */
     public function createCountRequest()
     {
-        return new CountApiRequest(
+        if ($this->unfoldAttribute === null) {
+            return new CountApiRequest(
+                $this->getIndices(),
+                $this->getTypes(),
+                array('query' => $this->ds->renderFilter($this->getFilter()))
+            );
+        }
+
+        $requestedFields = $this->getColumns();
+        if (isset($requestedFields[$this->unfoldAttribute])) {
+            $realUnfoldAttribute = $requestedFields[$this->unfoldAttribute];
+        } elseif (in_array($this->unfoldAttribute, $requestedFields, true)) {
+            $realUnfoldAttribute = $this->unfoldAttribute;
+        } else {
+            throw new LogicException('The field used to unfold a query\'s result must be selected');
+        }
+
+        $request = new SearchApiRequest(
             $this->getIndices(),
             $this->getTypes(),
-            array('query' => $this->ds->renderFilter($this->getFilter()))
+            array(
+                'query' => $this->ds->renderFilter($this->getFilter()),
+                'aggs'  => array(
+                    'unfolded_count' => array(
+                        'value_count' => array(
+                            'field' => $realUnfoldAttribute
+                        )
+                    )
+                )
+            )
         );
+
+        $request->getParams()
+            ->add('_source', 'false')
+            ->add('filter_path', 'aggregations');
+        return $request;
     }
 
     /**
@@ -142,7 +243,11 @@ class RestApiQuery extends SimpleQuery
     public function createCountResult(RestApiResponse $response)
     {
         $json = $response->json();
-        return $json['count'];
+        if ($this->unfoldAttribute === null) {
+            return $json['count'];
+        } else {
+            return $json['aggregations']['unfolded_count']['value'];
+        }
     }
 
     /**
@@ -180,6 +285,23 @@ class RestApiQuery extends SimpleQuery
             $body['_source'] = empty($sourceFields) ? false : $sourceFields;
         }
 
+        if ($this->unfoldAttribute !== null) {
+            if (isset($fields[$this->unfoldAttribute])) {
+                $realUnfoldAttribute = $fields[$this->unfoldAttribute];
+            } elseif (in_array($this->unfoldAttribute, $fields, true)) {
+                $realUnfoldAttribute = $this->unfoldAttribute;
+            } else {
+                throw new LogicException('The field used to unfold a query\'s result must be selected');
+            }
+
+            $body['highlight']['fields'][$realUnfoldAttribute] = array(
+                'pre_tags'              => array(''),
+                'post_tags'             => array(''),
+                'require_field_match'   => true,
+                'number_of_fragments'   => 0
+            );
+        }
+
         return new SearchApiRequest($this->getIndices(), $this->getTypes(), $body);
     }
 
@@ -192,10 +314,50 @@ class RestApiQuery extends SimpleQuery
      */
     public function createSearchResult(RestApiResponse $response)
     {
-        $json = $response->json();
+        $requestedFields = $this->getColumns();
+        $offset = $this->getOffset(true);
+        $limit = $this->getLimit(true);
+
+        $count = 0;
         $result = array();
+        $json = $response->json();
         foreach ($json['hits']['hits'] as $hit) {
-            $result[] = $this->ds->createRow($hit, $this->getColumns());
+            $rows = $this->ds->createRow($hit, $requestedFields, $this->unfoldAttribute);
+            if (! is_array($rows)) {
+                $count += 1;
+                if ($offset === 0 || $offset < $count) {
+                    $result[] = $rows;
+                }
+
+                if ($limit > 0 && $limit === count($result)) {
+                    return $result;
+                }
+            } else {
+                $realUnfoldAttribute = isset($requestedFields[$this->unfoldAttribute])
+                    ? $requestedFields[$this->unfoldAttribute]
+                    : $this->unfoldAttribute;
+
+                $matchedValues = null;
+                if (isset($hit['highlight'][$realUnfoldAttribute])) {
+                    $matchedValues = array_map('strtolower', $hit['highlight'][$realUnfoldAttribute]);
+                    unset($hit['highlight'][$realUnfoldAttribute]);
+                }
+
+                foreach ($rows as $row) {
+                    if (empty($matchedValues) ||
+                        in_array(strtolower($row->{$this->unfoldAttribute}), $matchedValues, true)
+                    ) {
+                        $count += 1;
+                        if ($offset === 0 || $offset < $count) {
+                            $result[] = $row;
+                        }
+
+                        if ($limit > 0 && $limit === count($result)) {
+                            return $result;
+                        }
+                    }
+                }
+            }
         }
 
         return $result;

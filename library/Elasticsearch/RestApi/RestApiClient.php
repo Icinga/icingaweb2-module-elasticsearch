@@ -227,14 +227,16 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     /**
      * Merge meta fields and source fields together and return them as simple object
      *
-     * Applies column aliases and sets null for each missing attribute.
+     * Applies column aliases, aggregates/unfolds multi-value attributes
+     * as array and sets null for each missing attribute.
      *
      * @param   array   $hit
      * @param   array   $requestedFields
+     * @param   string  $unfoldAttribute
      *
-     * @return  object
+     * @return  object|array    An array in case the object has been unfolded
      */
-    public function createRow(array $hit, array $requestedFields)
+    public function createRow(array $hit, array $requestedFields, $unfoldAttribute = null)
     {
         // In case the hit contains attributes with a differing case than the requested fields, it is necessary
         // to create another array to map attributes case insensitively to their requested counterparts.
@@ -300,6 +302,32 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             if (! array_key_exists($alias, $fields)) {
                 $fields[$alias] = null;
             }
+        }
+
+        if ($unfoldAttribute !== null && isset($fields[$unfoldAttribute]) && is_array($fields[$unfoldAttribute])) {
+            $siblings = array();
+            foreach ($loweredFieldMap as $loweredName => $requestedName) {
+                if (is_array($requestedName) && in_array($unfoldAttribute, $requestedName, true)) {
+                    $siblings = array_diff($requestedName, array($unfoldAttribute));
+                    break;
+                }
+            }
+
+            $values = $fields[$unfoldAttribute];
+            unset($fields[$unfoldAttribute]);
+            $baseRow = (object) $fields;
+            $rows = array();
+            foreach ($values as $value) {
+                $row = clone $baseRow;
+                $row->{$unfoldAttribute} = $value;
+                foreach ($siblings as $sibling) {
+                    $row->{$sibling} = $value;
+                }
+
+                $rows[] = $row;
+            }
+
+            return $rows;
         }
 
         return (object) $fields;
