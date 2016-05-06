@@ -419,7 +419,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     {
         $request = new GetApiRequest($index, $documentType, $id);
         if (! empty($fields)) {
-            if (count($fields) == 1 && $fields[0] === '_source') {
+            if (count($fields) == 1 && reset($fields) === '_source') {
                 $request->setSourceOnly();
                 $fields = null;
             } else {
