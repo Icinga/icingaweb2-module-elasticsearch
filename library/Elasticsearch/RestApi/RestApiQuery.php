@@ -139,45 +139,6 @@ class RestApiQuery extends SimpleQuery
     }
 
     /**
-     * Return the limit for this query
-     *
-     * This will return a modified version of the actual limit in case attribute unfolding has been enabled.
-     *
-     * @param   bool    $ignoreUnfoldAttribute      Pass true to return the actual limit
-     *
-     * @return int|null
-     */
-    public function getLimit($ignoreUnfoldAttribute = false)
-    {
-        if ($this->unfoldAttribute === null || $ignoreUnfoldAttribute || !$this->hasOffset()) {
-            return parent::getLimit();
-        } elseif ($this->hasLimit()) {
-            $limit = ($this->limitOffset / $this->limitCount + 1) * $this->limitCount;
-            if ($this->peekAhead) {
-                $limit += 1;
-            }
-
-            return $limit;
-        } else {
-            return $this->limitCount;
-        }
-    }
-
-    /**
-     * Return the offset for this query
-     *
-     * This will return a offset of zero in case attribute unfolding has been enabled.
-     *
-     * @param   bool    $ignoreUnfoldAttribute      Pass true to return the actual limit
-     *
-     * @return int|null
-     */
-    public function getOffset($ignoreUnfoldAttribute = false)
-    {
-        return $this->unfoldAttribute === null || $ignoreUnfoldAttribute ? parent::getOffset() : 0;
-    }
-
-    /**
      * Choose a document type and the fields you are interested in
      *
      * {@inheritdoc} This registers the given target as type filter.
@@ -300,6 +261,16 @@ class RestApiQuery extends SimpleQuery
                 'require_field_match'   => true,
                 'number_of_fragments'   => 0
             );
+
+            $body['from'] = 0;
+            if ($this->hasOffset() && $this->hasLimit()) {
+                $limit = ($this->limitOffset / $this->limitCount + 1) * $this->limitCount;
+                if ($this->peekAhead) {
+                    $limit += 1;
+                }
+
+                $body['size'] = $limit;
+            }
         }
 
         return new SearchApiRequest($this->getIndices(), $this->getTypes(), $body);
