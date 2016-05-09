@@ -4,8 +4,8 @@
 namespace Icinga\Module\Elasticsearch\RestApi;
 
 use ArrayIterator;
-use Icinga\Application\Benchmark;
 use LogicException;
+use Icinga\Application\Benchmark;
 use Icinga\Data\Extensible;
 use Icinga\Data\Filter\Filter;
 use Icinga\Data\Reducible;
@@ -222,115 +222,6 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         }
 
         return $query->createSearchResult($response);
-    }
-
-    /**
-     * Merge meta fields and source fields together and return them as simple object
-     *
-     * Applies column aliases, aggregates/unfolds multi-value attributes
-     * as array and sets null for each missing attribute.
-     *
-     * @param   array   $hit
-     * @param   array   $requestedFields
-     * @param   string  $unfoldAttribute
-     *
-     * @return  object|array    An array in case the object has been unfolded
-     */
-    public function createRow(array $hit, array $requestedFields, $unfoldAttribute = null)
-    {
-        // In case the hit contains attributes with a differing case than the requested fields, it is necessary
-        // to create another array to map attributes case insensitively to their requested counterparts.
-        // This does also apply the virtual alias handling. (Since Elasticsearch does not handle such)
-        $loweredFieldMap = array();
-        foreach ($requestedFields as $alias => $name) {
-            $loweredName = strtolower($name);
-            if (isset($loweredFieldMap[$loweredName])) {
-                if (! is_array($loweredFieldMap[$loweredName])) {
-                    $loweredFieldMap[$loweredName] = array($loweredFieldMap[$loweredName]);
-                }
-
-                $loweredFieldMap[$loweredName][] = is_string($alias) ? $alias : $name;
-            } else {
-                $loweredFieldMap[$loweredName] = is_string($alias) ? $alias : $name;
-            }
-        }
-
-        $source = null;
-        $fields = array();
-        foreach ($hit as $metaField => $metaValue) {
-            if ($metaField === '_source') {
-                $source = $metaValue;
-            } elseif (empty($loweredFieldMap)) {
-                $fields[$metaField] = $metaValue;
-            } elseif (isset($loweredFieldMap[strtolower($metaField)])) {
-                $requestedFieldName = $loweredFieldMap[strtolower($metaField)];
-                if (is_array($requestedFieldName)) {
-                    foreach ($requestedFieldName as $requestedName) {
-                        $fields[$requestedName] = $metaValue;
-                    }
-                } else {
-                    $fields[$requestedFieldName] = $metaValue;
-                }
-            }
-        }
-
-        if (! empty($source)) {
-            foreach ($source as $fieldName => $fieldValue) {
-                if (empty($loweredFieldMap)) {
-                    $fields[$fieldName] = $fieldValue;
-                } elseif (isset($loweredFieldMap[strtolower($fieldName)])) {
-                    // TODO: What about wildcard patterns?
-                    $requestedFieldName = $loweredFieldMap[strtolower($fieldName)];
-                    if (is_array($requestedFieldName)) {
-                        foreach ($requestedFieldName as $requestedName) {
-                            $fields[$requestedName] = $fieldValue;
-                        }
-                    } else {
-                        $fields[$requestedFieldName] = $fieldValue;
-                    }
-                }
-            }
-        }
-
-        // The hit may not contain all requested fields, so populate the
-        // fields with the missing ones and their value being set to null
-        foreach ($requestedFields as $alias => $name) {
-            if (! is_string($alias)) {
-                $alias = $name;
-            }
-
-            if (! array_key_exists($alias, $fields)) {
-                $fields[$alias] = null;
-            }
-        }
-
-        if ($unfoldAttribute !== null && isset($fields[$unfoldAttribute]) && is_array($fields[$unfoldAttribute])) {
-            $siblings = array();
-            foreach ($loweredFieldMap as $loweredName => $requestedName) {
-                if (is_array($requestedName) && in_array($unfoldAttribute, $requestedName, true)) {
-                    $siblings = array_diff($requestedName, array($unfoldAttribute));
-                    break;
-                }
-            }
-
-            $values = $fields[$unfoldAttribute];
-            unset($fields[$unfoldAttribute]);
-            $baseRow = (object) $fields;
-            $rows = array();
-            foreach ($values as $value) {
-                $row = clone $baseRow;
-                $row->{$unfoldAttribute} = $value;
-                foreach ($siblings as $sibling) {
-                    $row->{$sibling} = $value;
-                }
-
-                $rows[] = $row;
-            }
-
-            return $rows;
-        }
-
-        return (object) $fields;
     }
 
     /**
