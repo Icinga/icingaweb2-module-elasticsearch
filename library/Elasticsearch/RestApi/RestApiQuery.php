@@ -156,7 +156,8 @@ class RestApiQuery extends SimpleQuery
      */
     public function createCountRequest()
     {
-        if ($this->unfoldAttribute === null) {
+        $foldedColumn = $this->getUnfoldAttribute();
+        if ($foldedColumn === null) {
             return new CountApiRequest(
                 $this->getIndices(),
                 $this->getTypes(),
@@ -165,10 +166,10 @@ class RestApiQuery extends SimpleQuery
         }
 
         $requestedFields = $this->getColumns();
-        if (isset($requestedFields[$this->unfoldAttribute])) {
-            $realUnfoldAttribute = $requestedFields[$this->unfoldAttribute];
-        } elseif (in_array($this->unfoldAttribute, $requestedFields, true)) {
-            $realUnfoldAttribute = $this->unfoldAttribute;
+        if (isset($requestedFields[$foldedColumn])) {
+            $foldedField = $requestedFields[$foldedColumn];
+        } elseif (in_array($foldedColumn, $requestedFields, true)) {
+            $foldedField = $foldedColumn;
         } else {
             throw new LogicException('The field used to unfold a query\'s result must be selected');
         }
@@ -181,7 +182,7 @@ class RestApiQuery extends SimpleQuery
                 'aggs'  => array(
                     'unfolded_count' => array(
                         'value_count' => array(
-                            'field' => $realUnfoldAttribute
+                            'field' => $foldedField
                         )
                     )
                 )
@@ -204,7 +205,7 @@ class RestApiQuery extends SimpleQuery
     public function createCountResult(RestApiResponse $response)
     {
         $json = $response->json();
-        if ($this->unfoldAttribute === null) {
+        if ($this->getUnfoldAttribute() === null) {
             return $json['count'];
         } else {
             return $json['aggregations']['unfolded_count']['value'];
@@ -246,21 +247,15 @@ class RestApiQuery extends SimpleQuery
             $body['_source'] = empty($sourceFields) ? false : $sourceFields;
         }
 
-        if ($this->unfoldAttribute !== null) {
-            if (isset($fields[$this->unfoldAttribute])) {
-                $realUnfoldAttribute = $fields[$this->unfoldAttribute];
-            } elseif (in_array($this->unfoldAttribute, $fields, true)) {
-                $realUnfoldAttribute = $this->unfoldAttribute;
-            } else {
-                throw new LogicException('The field used to unfold a query\'s result must be selected');
+        if ($this->getUnfoldAttribute() !== null) {
+            foreach ($this->foldedHighlights() as $field) {
+                $body['highlight']['fields'][$field] = array(
+                    'pre_tags'              => array(''),
+                    'post_tags'             => array(''),
+                    'require_field_match'   => true,
+                    'number_of_fragments'   => 0
+                );
             }
-
-            $body['highlight']['fields'][$realUnfoldAttribute] = array(
-                'pre_tags'              => array(''),
-                'post_tags'             => array(''),
-                'require_field_match'   => true,
-                'number_of_fragments'   => 0
-            );
 
             $body['from'] = 0;
             if ($this->hasOffset() && $this->hasLimit()) {
@@ -285,39 +280,38 @@ class RestApiQuery extends SimpleQuery
      */
     public function createSearchResult(RestApiResponse $response)
     {
+        $foldedColumn = $this->getUnfoldAttribute();
         $requestedFields = $this->getColumns();
-        $offset = $this->getOffset(true);
-        $limit = $this->getLimit(true);
+        $offset = $this->getOffset();
+        $limit = $this->getLimit();
 
         $count = 0;
         $result = array();
         $json = $response->json();
         foreach ($json['hits']['hits'] as $hit) {
-            $rows = $this->ds->createRow($hit, $requestedFields, $this->unfoldAttribute);
-            if (! is_array($rows)) {
-                $count += 1;
-                if ($offset === 0 || $offset < $count) {
-                    $result[] = $rows;
-                }
-
-                if ($limit > 0 && $limit === count($result)) {
-                    return $result;
-                }
+            $hit = new SearchHit($hit);
+            if ($foldedColumn === null) {
+                $result[] = $hit->createRow($requestedFields);
             } else {
-                $realUnfoldAttribute = isset($requestedFields[$this->unfoldAttribute])
-                    ? $requestedFields[$this->unfoldAttribute]
-                    : $this->unfoldAttribute;
+                foreach ($hit->createRows($requestedFields, $foldedColumn) as $row) {
+                    $matches = true;
+                    if (isset($hit['highlight'])) {
+                        foreach ($this->foldedHighlights() as $column => $field) {
+                            if (isset($hit['highlight'][$field])) {
+                                $value = $row->{$foldedColumn};
+                                if (is_string($column) && is_object($value)) {
+                                    $value = $value->{$column};
+                                }
 
-                $matchedValues = null;
-                if (isset($hit['highlight'][$realUnfoldAttribute])) {
-                    $matchedValues = array_map('strtolower', $hit['highlight'][$realUnfoldAttribute]);
-                    unset($hit['highlight'][$realUnfoldAttribute]);
-                }
+                                if (! in_array($value, $hit['highlight'][$field], true)) {
+                                    $matches = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
 
-                foreach ($rows as $row) {
-                    if (empty($matchedValues) ||
-                        in_array(strtolower($row->{$this->unfoldAttribute}), $matchedValues, true)
-                    ) {
+                    if ($matches) {
                         $count += 1;
                         if ($offset === 0 || $offset < $count) {
                             $result[] = $row;
@@ -332,5 +326,38 @@ class RestApiQuery extends SimpleQuery
         }
 
         return $result;
+    }
+
+    /**
+     * Return the highlight columns of an unfolded row
+     *
+     * @return  array
+     */
+    protected function foldedHighlights()
+    {
+        $requestedFields = $this->getColumns();
+        $foldedColumn = $this->getUnfoldAttribute();
+        if (isset($requestedFields[$foldedColumn])) {
+            $highlightFields = array($requestedFields[$foldedColumn]);
+        } elseif (in_array($foldedColumn, $requestedFields, true)) {
+            $highlightFields = array($foldedColumn);
+        } else {
+            $highlightFields = array();
+            foreach ($requestedFields as $alias => $field) {
+                if (is_string($alias) && strpos($alias, '.') !== false) {
+                    list($parent, $child) = explode('.', $alias, 2);
+                } elseif (strpos($field, '.') !== false) {
+                    list($parent, $child) = explode('.', $field, 2);
+                } else {
+                    continue;
+                }
+
+                if ($parent === $foldedColumn) {
+                    $highlightFields[$child] = $field;
+                }
+            }
+        }
+
+        return $highlightFields;
     }
 }
