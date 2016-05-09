@@ -3,7 +3,7 @@
 
 namespace Icinga\Module\Elasticsearch\Forms\Config;
 
-use Icinga\Web\Notification;
+use Icinga\Application\Config;
 use Icinga\Forms\ConfigForm;
 
 class ElasticsearchConfigForm extends ConfigForm
@@ -18,44 +18,51 @@ class ElasticsearchConfigForm extends ConfigForm
     }
 
     /**
-     * @see Form::onSuccess()
-     */
-    public function onSuccess()
-    {
-        $this->config->setSection('elasticsearch', $this->getValues());
-
-        if ($this->save()) {
-            Notification::success($this->translate('New Elasticsearch configuration has successfully been stored'));
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * @see Form::onRequest()
-     */
-    public function onRequest()
-    {
-        $this->populate($this->config->getSection('elasticsearch')->toArray());
-    }
-
-    /**
-     * @see Form::createElements()
+     * {@inheritdoc}
      */
     public function createElements(array $formData)
     {
         $this->addElement(
             'text',
-            'url',
+            'elasticsearch_url',
             array(
-                'value'         => 'http://elasticsearch:9200',
+                'allowEmpty'    => true,
+                'placeholder'   => 'http://localhost:9200',
                 'label'         => $this->translate('Elasticsearch URL'),
-                'description'   => $this->translate('URL to your Elasticsearch installation.')
+                'description'   => $this->translate('URL to your Elasticsearch cluster')
             )
         );
         $this->addElement(
             'text',
-            'index_pattern',
+            'elasticsearch_username',
+            array(
+                'allowEmpty'    => true,
+                'label'         => $this->translate('Username'),
+                'description'   => $this->translate('The user name to use for authentication')
+            )
+        );
+        $this->addElement(
+            'password',
+            'elasticsearch_password',
+            array(
+                'renderPassword'    => true,
+                'allowEmpty'        => true,
+                'label'             => $this->translate('Password'),
+                'description'       => $this->translate('The password to use for authentication')
+            )
+        );
+        $this->addElement(
+            'text',
+            'elasticsearch_certificate_path',
+            array(
+                'allowEmpty'    => true,
+                'label'         => $this->translate('Certificate Path'),
+                'description'   => $this->translate('The path to the Elasticsearch\'s certificate if HTTPS is used')
+            )
+        );
+        $this->addElement(
+            'text',
+            'elasticsearch_index_pattern',
             array(
                 'value'         => 'logstash-*',
                 'label'         => $this->translate('Logstash index pattern'),
@@ -65,5 +72,21 @@ class ElasticsearchConfigForm extends ConfigForm
                 )
             )
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function writeConfig(Config $config)
+    {
+        // TODO: Remove this once #11743 is fixed
+        $section = $config->getSection('elasticsearch');
+        foreach ($section->toArray() as $key => $value) {
+            if ($value === null) {
+                unset($section->{$key});
+            }
+        }
+
+        parent::writeConfig($config);
     }
 }
