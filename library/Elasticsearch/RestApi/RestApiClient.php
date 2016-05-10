@@ -433,7 +433,11 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             }
         } elseif ($filter !== null) {
             $query = new RestApiQuery($this, array('_id'));
-            $ids = $query->setFilter($filter)->fetchColumn();
+            $ids = $query
+                ->setIndices(array($index))
+                ->setTypes(array($documentType))
+                ->setFilter($filter)
+                ->fetchColumn();
             if (empty($ids)) {
                 throw new StatementException('No documents found');
             } elseif (count($ids) == 1) {
@@ -510,7 +514,11 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             $request = new DeleteApiRequest($index, $documentType, $id);
         } elseif ($filter !== null) {
             $query = new RestApiQuery($this, array('_id'));
-            $ids = $query->setFilter($filter)->fetchColumn();
+            $ids = $query
+                ->setIndices(array($index))
+                ->setTypes(array($documentType))
+                ->setFilter($filter)
+                ->fetchColumn();
             if (empty($ids)) {
                 throw new StatementException('No documents found');
             } elseif (count($ids) == 1) {
