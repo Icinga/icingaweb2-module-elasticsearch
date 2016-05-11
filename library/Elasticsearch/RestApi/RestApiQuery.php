@@ -5,6 +5,7 @@ namespace Icinga\Module\Elasticsearch\RestApi;
 
 use LogicException;
 use Icinga\Data\SimpleQuery;
+use Icinga\Web\UrlParams;
 
 class RestApiQuery extends SimpleQuery
 {
@@ -31,6 +32,13 @@ class RestApiQuery extends SimpleQuery
      * @var array
      */
     protected $types;
+
+    /**
+     * The URL params to use for count and search requests
+     *
+     * @var UrlParams
+     */
+    protected $params;
 
     /**
      * Whether _source retrieval is disabled
@@ -90,6 +98,33 @@ class RestApiQuery extends SimpleQuery
     public function getTypes()
     {
         return $this->types;
+    }
+
+    /**
+     * Set the URL params to use for count and search requests
+     *
+     * @param   UrlParams   $params
+     *
+     * @return  $this
+     */
+    public function setParams(UrlParams $params)
+    {
+        $this->params = $params;
+        return $this;
+    }
+
+    /**
+     * Return the URL params to use for count and search requests
+     *
+     * @return  UrlParams
+     */
+    public function getParams()
+    {
+        if ($this->params === null) {
+            $this->params = new UrlParams();
+        }
+
+        return $this->params;
     }
 
     /**
@@ -158,11 +193,12 @@ class RestApiQuery extends SimpleQuery
     {
         $foldedColumn = $this->getUnfoldAttribute();
         if ($foldedColumn === null) {
-            return new CountApiRequest(
+            $request = new CountApiRequest(
                 $this->getIndices(),
                 $this->getTypes(),
                 array('query' => $this->ds->renderFilter($this->getFilter()))
             );
+            return $request->setParams($this->getParams());
         }
 
         $requestedFields = $this->getColumns();
@@ -189,10 +225,10 @@ class RestApiQuery extends SimpleQuery
             )
         );
 
-        $request->getParams()
-            ->add('_source', 'false')
-            ->add('filter_path', 'aggregations');
-        return $request;
+        $params = $this->getParams()
+            ->set('_source', 'false')
+            ->set('filter_path', 'aggregations');
+        return $request->setParams($params);
     }
 
     /**
@@ -268,7 +304,8 @@ class RestApiQuery extends SimpleQuery
             }
         }
 
-        return new SearchApiRequest($this->getIndices(), $this->getTypes(), $body);
+        $request = new SearchApiRequest($this->getIndices(), $this->getTypes(), $body);
+        return $request->setParams($this->getParams());
     }
 
     /**
