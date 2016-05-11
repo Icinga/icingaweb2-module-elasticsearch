@@ -13,6 +13,7 @@ use Icinga\Data\Updatable;
 use Icinga\Exception\StatementException;
 use Icinga\Repository\Repository;
 use Icinga\Repository\RepositoryQuery;
+use Icinga\Web\UrlParams;
 use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
 
 abstract class ElasticsearchRepository extends Repository implements Extensible, Reducible, Updatable
@@ -146,19 +147,21 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
     /**
      * Fetch and return the given document
      *
-     * @param   string  $documentType   The type of the document to fetch
-     * @param   string  $id             The id of the document to fetch
-     * @param   array   $fields         The desired fields to return instead of all fields
+     * @param   string      $documentType   The type of the document to fetch
+     * @param   string      $id             The id of the document to fetch
+     * @param   array       $fields         The desired fields to return instead of all fields
+     * @param   UrlParams   $params         Additional URL parameters to add to the request
      *
      * @return  object|false            Returns false in case no document could be found
      */
-    public function fetchDocument($documentType, $id, array $fields = null)
+    public function fetchDocument($documentType, $id, array $fields = null, UrlParams $params = null)
     {
         return $this->ds->fetchDocument(
             $this->getIndex(),
             $this->requireTable($documentType),
             $id,
-            $this->prepareFields($documentType, $fields)
+            $this->prepareFields($documentType, $fields),
+            $params
         );
     }
 
@@ -167,13 +170,13 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      *
      * @param   string|array    $documentType
      * @param   array           $document
-     * @param   bool            $refresh        Whether to refresh the index
+     * @param   UrlParams       $params         Additional URL parameters to add to the request
      *
      * @return  bool    Whether the document has been created or not
      *
      * @throws  StatementException
      */
-    public function insert($documentType, array $document, $refresh = true)
+    public function insert($documentType, array $document, UrlParams $params = null)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -183,7 +186,7 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
         return $this->ds->insert(
             $this->applyIndex($documentType),
             $this->requireStatementColumns($this->extractDocumentType($documentType), $document),
-            $refresh
+            $params
         );
     }
 
@@ -193,14 +196,13 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      * @param   string|array    $documentType
      * @param   array           $document
      * @param   Filter          $filter
-     * @param   bool            $refresh        Whether to refresh the index
-     * @param   bool            $fetchSource    Whether to include the updated document in the result
+     * @param   UrlParams       $params         Additional URL parameters to add to the request
      *
      * @return  array   The response for the requested update
      *
      * @throws  StatementException
      */
-    public function update($documentType, array $document, Filter $filter = null, $refresh = true, $fetchSource = true)
+    public function update($documentType, array $document, Filter $filter = null, UrlParams $params = null)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -216,8 +218,7 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
             $this->applyIndex($documentType),
             $this->requireStatementColumns($this->extractDocumentType($documentType), $document),
             $filter,
-            $refresh,
-            $fetchSource
+            $params
         );
     }
 
@@ -226,11 +227,11 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
      *
      * @param   string|array    $documentType
      * @param   Filter          $filter
-     * @param   bool            $refresh        Whether to refresh the index
+     * @param   UrlParams       $params         Additional URL parameters to add to the request
      *
      * @throws  StatementException
      */
-    public function delete($documentType, Filter $filter = null, $refresh = true)
+    public function delete($documentType, Filter $filter = null, UrlParams $params = null)
     {
         if (is_string($documentType)) {
             $documentType = explode('/', $documentType);
@@ -242,7 +243,7 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
             $filter = $this->requireFilter($this->extractDocumentType($documentType), $filter);
         }
 
-        return $this->ds->delete($this->applyIndex($documentType), $filter, $refresh);
+        return $this->ds->delete($this->applyIndex($documentType), $filter, $params);
     }
 
     /**

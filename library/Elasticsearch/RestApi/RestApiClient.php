@@ -15,6 +15,7 @@ use Icinga\Exception\IcingaException;
 use Icinga\Exception\NotImplementedError;
 use Icinga\Exception\StatementException;
 use Icinga\Exception\QueryException;
+use Icinga\Web\UrlParams;
 use Icinga\Module\Elasticsearch\Exception\RestApiException;
 
 class RestApiClient implements Extensible, Reducible, Selectable, Updatable
@@ -299,22 +300,27 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * In case you are only interested in the source, pass "_source" as the only desired field.
      *
-     * @param   string  $index          The index the document is located in
-     * @param   string  $documentType   The type of the document to fetch
-     * @param   string  $id             The id of the document to fetch
-     * @param   array   $fields         The desired fields to return instead of all fields
+     * @param   string      $index          The index the document is located in
+     * @param   string      $documentType   The type of the document to fetch
+     * @param   string      $id             The id of the document to fetch
+     * @param   array       $fields         The desired fields to return instead of all fields
+     * @param   UrlParams   $params         Additional URL parameters to add to the request
      *
      * @return  object|false            Returns false in case no document could be found
      */
-    public function fetchDocument($index, $documentType, $id, array $fields = null)
+    public function fetchDocument($index, $documentType, $id, array $fields = null, UrlParams $params = null)
     {
         $request = new GetApiRequest($index, $documentType, $id);
+        if ($params !== null) {
+            $request->setParams($params);
+        }
+
         if (! empty($fields)) {
             if (count($fields) == 1 && reset($fields) === '_source') {
                 $request->setSourceOnly();
                 $fields = null;
-            } else {
-                $request->getParams()->add('_source', join(',', $fields));
+            } elseif (! $request->getParams()->has('_source')) {
+                $request->getParams()->set('_source', join(',', $fields));
             }
         }
 
@@ -336,13 +342,13 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @param   string|array    $target
      * @param   array           $data
-     * @param   bool            $refresh    Whether to refresh the index
+     * @param   UrlParams       $params     Additional URL parameters to add to the request
      *
-     * @return  bool                    Whether the document has been created or not
+     * @return  bool    Whether the document has been created or not
      *
      * @throws  StatementException
      */
-    public function insert($target, array $data, $refresh = true)
+    public function insert($target, array $data, UrlParams $params = null)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -361,8 +367,14 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
         }
 
         $request = new IndexApiRequest($index, $documentType, $id, $data);
-        if ($refresh) {
-            $request->getParams()->add('refresh');
+        if ($params !== null) {
+            $request->setParams($params);
+        } else {
+            $params = $request->getParams();
+        }
+
+        if (! $params->has('refresh')) {
+            $params->set('refresh', true);
         }
 
         try {
@@ -395,8 +407,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   string|array    $target
      * @param   array           $data
      * @param   Filter          $filter
-     * @param   bool            $refresh        Whether to refresh the index
-     * @param   bool            $fetchSource    Whether to include the updated document in the result
+     * @param   UrlParams       $params     Additional URL parameters to add to the request
      *
      * @return  array   The response for the requested update
      *
@@ -404,7 +415,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @todo    Add support for bulk updates
      */
-    public function update($target, array $data, Filter $filter = null, $refresh = true, $fetchSource = true)
+    public function update($target, array $data, Filter $filter = null, UrlParams $params = null)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -428,9 +439,6 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
 
         if ($id !== null) {
             $request = new UpdateApiRequest($index, $documentType, $id, array('doc' => (object) $data));
-            if ($fetchSource) {
-                $request->getParams()->add('fields', '_source');
-            }
         } elseif ($filter !== null) {
             $query = new RestApiQuery($this, array('_id'));
             $ids = $query
@@ -442,16 +450,22 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 throw new StatementException('No documents found');
             } elseif (count($ids) == 1) {
                 $request = new UpdateApiRequest($index, $documentType, $ids[0], array('doc' => (object) $data));
-                if ($fetchSource) {
-                    $request->getParams()->add('fields', '_source');
-                }
             } else {
                 throw new NotImplementedError('Bulk updates are not supported yet');
             }
         }
 
-        if ($refresh) {
-            $request->getParams()->add('refresh');
+        if ($params !== null) {
+            $request->setParams($params);
+        } else {
+            $params = $request->getParams();
+        }
+
+        if (! $params->has('refresh')) {
+            $params->set('refresh', true);
+        }
+        if (! $params->has('fields')) {
+            $params->set('fields', '_source');
         }
 
         try {
@@ -482,13 +496,13 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @param   string|array    $target
      * @param   Filter          $filter
-     * @param   bool            $refresh    Whether to refresh the index
+     * @param   UrlParams       $params     Additional URL parameters to add to the request
      *
      * @throws  StatementException
      *
      * @todo    Add support for bulk deletions
      */
-    public function delete($target, Filter $filter = null, $refresh = true)
+    public function delete($target, Filter $filter = null, UrlParams $params = null)
     {
         if (is_string($target)) {
             $target = explode('/', $target);
@@ -528,8 +542,14 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
             }
         }
 
-        if ($refresh) {
-            $request->getParams()->add('refresh');
+        if ($params !== null) {
+            $request->setParams($params);
+        } else {
+            $params = $request->getParams();
+        }
+
+        if (! $params->has('refresh')) {
+            $params->set('refresh', true);
         }
 
         try {
