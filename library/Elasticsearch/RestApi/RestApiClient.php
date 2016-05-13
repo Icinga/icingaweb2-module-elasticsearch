@@ -121,7 +121,7 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
     public function request(RestApiRequest $request)
     {
         $scheme = strpos($this->host, '://') !== false ? '' : 'http://';
-        $path = '/' . ltrim($request->getPath(), '/');
+        $path = '/' . join('/', array_map('rawurlencode', explode('/', ltrim($request->getPath(), '/'))));
         $query = ($request->getParams()->isEmpty() ? '' : ('?' . (string) $request->getParams()));
 
         $curl = $this->getConnection();
