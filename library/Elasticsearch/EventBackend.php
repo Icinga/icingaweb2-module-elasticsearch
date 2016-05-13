@@ -38,7 +38,7 @@ class EventBackend extends ElasticsearchRepository
             $types[] = $table = $this->baseTable;
         }
         $columns = array(
-            $table => $this->ds->fetchColumns($this->index, $types),
+            $table => $this->ds->fetchColumns(array($this->index), $types),
         );
         return $columns;
     }

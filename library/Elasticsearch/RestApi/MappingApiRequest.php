@@ -3,44 +3,91 @@
 
 namespace Icinga\Module\Elasticsearch\RestApi;
 
-use LogicException;
-
-class MappingApiRequest extends IndicesApiRequest
+class MappingApiRequest extends RestApiRequest
 {
     /**
-     * A list of types to work with.
+     * The indices to work with
+     *
+     * @var array
+     */
+    protected $indices;
+
+    /**
+     * The types to work with
      *
      * @var array
      */
     protected $types;
 
     /**
-     * Creates a new MappingApiRequest.
-     * 
-     * @param  string  $index  The index name or pattern
-     * @param  array   $types  A list of types to get mappings for
+     * The fields to work with
+     *
+     * @var array
      */
-    public function __construct($index, $types = array())
+    protected $fields;
+
+    /**
+     * Create a new MappingApiRequest
+     *
+     * @param   array   $indices    The indices to work with
+     * @param   array   $types      The types to work with
+     * @param   array   $fields     The fields to work with
+     * @param   array   $data       The index, mapping or field settings to send
+     */
+    public function __construct(array $indices, array $types, array $fields = null, array $data = null)
     {
-        parent::__construct($index);
+        $this->indices = $indices;
         $this->types = $types;
+        $this->fields = $fields;
+        $this->setPayload($data, $data !== null ? 'application/json' : null);
+    }
+
+    /**
+     * Create and return the path for this MappingApiRequest
+     *
+     * @return  string
+     */
+    protected function createPath()
+    {
+        if (! empty($this->indices)) {
+            $path = sprintf('/%s/_mappings', join(',', $this->indices));
+        } else {
+            $path = '/_mappings';
+        }
+
+        if (! empty($this->types)) {
+            $path .= '/' . join(',', $this->types);
+        }
+
+        if (! empty($this->indices) && !empty($this->fields)) {
+            $path .= '/field/' . join(',', $this->fields);
+        }
+
+        return $path;
     }
 
     /**
      * {@inheritdoc}
      */
-    protected function createPath()
+    public function getPath()
     {
-        if (! empty($this->types)) {
-            $types = array();
-            foreach ($this->types as $type) {
-                if (preg_match('#,#', $type)) {
-                    throw new LogicException('a type must not contain a comma!');
-                }
-                $types[] = urlencode(trim($type));
-            }
-            return sprintf('/%s/_mapping/%s', $this->index, join(',', $types));
+        if ($this->path === null) {
+            $this->path = $this->createPath();
         }
-        return sprintf('/%s/_mapping', $this->index);
+
+        return $this->path;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPayload()
+    {
+        $payload = parent::getPayload();
+        if ($payload !== null) {
+            $payload = $this->jsonEncode($payload);
+        }
+
+        return $payload;
     }
 }

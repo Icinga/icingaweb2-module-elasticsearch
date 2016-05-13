@@ -624,8 +624,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * It will get you a merged list of columns available over the specified indices and types.
      *
-     * @param   string  $index  The index or index pattern to get
-     * @param   array   $types  An array of types to get columns for
+     * @param   array   $indices    The indices or index patterns to get
+     * @param   array   $types      An array of types to get columns for
      *
      * @throws  QueryException  When Elasticsearch returns an error
      *
@@ -633,10 +633,10 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      *
      * @todo    Do a cached retrieval?
      */
-    public function fetchColumns($index, $types = array())
+    public function fetchColumns(array $indices = null, array $types = null)
     {
         Benchmark::measure('Retrieving columns for types: ' . (!empty($types) ? join(', ', $types) : '(all)'));
-        $request = new MappingApiRequest($index, $types);
+        $request = new GetMappingApiRequest($indices, $types);
 
         $response = $this->request($request);
         if (! $response->isSuccess()) {
