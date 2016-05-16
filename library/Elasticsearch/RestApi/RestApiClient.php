@@ -498,6 +498,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
      * @param   Filter          $filter
      * @param   UrlParams       $params     Additional URL parameters to add to the request
      *
+     * @return  array   The response for the requested deletion
+     *
      * @throws  StatementException
      *
      * @todo    Add support for bulk deletions
@@ -569,6 +571,8 @@ class RestApiClient implements Extensible, Reducible, Selectable, Updatable
                 $this->renderErrorMessage($response)
             );
         }
+
+        return $response->json();
     }
 
     /**
