@@ -55,7 +55,7 @@ class FilterRenderer {
     {
         $this->filter = $filter;
         $this->query = $this->renderFilter($this->filter);
-        Logger::debug('Rendered elasticsearch filter: %s', json_encode($this->query, JSON_PRETTY_PRINT));
+        Logger::debug('Rendered elasticsearch filter: %s', json_encode($this->query));
         return $this;
     }
 
