@@ -11,8 +11,6 @@ use Icinga\Module\Elasticsearch\Forms\Config\ElasticsearchConfigForm;
  */
 class ConfigController extends Controller
 {
-    protected $ignore_elasticsearch = true;
-
     public function indexAction()
     {
         $this->redirectNow('elasticsearch/config/elasticsearch');

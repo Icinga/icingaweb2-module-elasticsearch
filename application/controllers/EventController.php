@@ -24,9 +24,7 @@ class EventController extends Controller
 
     public function searchAction()
     {
-        $client = new RestApiClient($this->elasticsearch_url);
-        $repository = new EventBackend($client);
-        $repository->setIndex($this->index_pattern);
+        $repository = EventBackend::fromConfig();
 
         if ($type = $this->getParam('type')) {
             $repository->setBaseTable($type);
@@ -103,8 +101,8 @@ class EventController extends Controller
             'url'   => $this->view->url()
         ))->activate(('show'));
 
-        $client = new RestApiClient($this->elasticsearch_url);
-        $event = new Event($client);
+        $repository = EventBackend::fromConfig();
+        $event = new Event($repository->getDataSource());
 
         $event->setIndex($index);
         $event->setType($type);
@@ -142,8 +140,8 @@ class EventController extends Controller
             $data['icinga_acknowledge'] = 0;
 
         // fetch the event
-        $client = new RestApiClient($this->elasticsearch_url);
-        $event = new Event($client);
+        $repository = EventBackend::fromConfig();
+        $event = new Event($repository->getDataSource());
 
         $event->setIndex($index);
         $event->setType($type);

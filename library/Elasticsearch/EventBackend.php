@@ -2,8 +2,7 @@
 
 namespace Icinga\Module\Elasticsearch;
 
-use Icinga\Data\QueryInterface;
-use Icinga\Exception\NotImplementedError;
+use Icinga\Application\Config;
 use Icinga\Module\Elasticsearch\Repository\ElasticsearchRepository;
 use Icinga\Module\Elasticsearch\RestApi\RestApiQuery;
 use Icinga\Repository\RepositoryQuery;
@@ -78,5 +77,19 @@ class EventBackend extends ElasticsearchRepository
             return null;
         }
         return parent::requireTable($documentType, $query);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    static public function fromConfig()
+    {
+        $backend = parent::fromConfig();
+
+        // TODO: move this to log types #11636
+        $resourceConfig = Config::module('elasticsearch')->getSection('elasticsearch');
+        $backend->setIndex($resourceConfig->get('logstash_pattern', 'logstash-*'));
+        
+        return $backend;
     }
 }

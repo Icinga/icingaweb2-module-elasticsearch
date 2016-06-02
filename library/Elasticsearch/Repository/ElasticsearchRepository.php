@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\Elasticsearch\Repository;
 
+use Icinga\Application\Config;
 use InvalidArgumentException;
 use LogicException;
 
@@ -275,5 +276,26 @@ abstract class ElasticsearchRepository extends Repository implements Extensible,
         }
 
         return parent::resolveQueryColumnAlias($table, $alias);
+    }
+
+    /**
+     * Create and return a new instance of ElasticsearchRepository, with the initialized RestApiClient
+     *
+     * @return $this
+     */
+    static public function fromConfig()
+    {
+        // TODO: replace this later by resource config #11637
+        $resourceConfig = Config::module('elasticsearch')->getSection('elasticsearch');
+
+        $client = new RestApiClient(
+            $resourceConfig->get('url', 'localhost:9200'),
+            $resourceConfig->get('username'),
+            $resourceConfig->get('password'),
+            $resourceConfig->get('certificate_path')
+        );
+
+        $backend = new static($client);
+        return $backend;
     }
 }
