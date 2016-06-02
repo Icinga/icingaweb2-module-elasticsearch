@@ -9,17 +9,11 @@ use Icinga\Exception\NotImplementedError;
 use Icinga\Module\Elasticsearch\Controller;
 
 use Icinga\Module\Elasticsearch\EventBackend;
-use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
 use Icinga\Module\Elasticsearch\Event;
 
 use Icinga\Module\Monitoring\Backend;
 use Icinga\Module\Monitoring\Object\Host;
 use Icinga\Module\Monitoring\Object\Service;
-
-use Icinga\Web\Widget\FilterEditor;
-use Icinga\Web\Widget\Limiter;
-use Icinga\Web\Widget\Paginator;
-use Icinga\Web\Widget;
 
 class EventController extends Controller
 {
@@ -40,21 +34,19 @@ class EventController extends Controller
 
         $query = $repository->select();
 
-        /** @var FilterEditor $editor */
-        $editor = Widget::create('filterEditor');
-        $editor->setQuery($query)
-               ->preserveParams('sort', 'dir', 'limit', 'fields', 'type')
-               ->ignoreParams('page')
-               ->handleRequest($this->getRequest());
-
-        $this->view->filterEditor = $editor;
+        $sort_columns = array();
+        foreach ($query->getColumns() as $value) {
+            $sort_columns[$value] = $value;
+        }
+        $this->setupFilterControl($query, null, null, array('fields'));
+        $this->setupLimitControl(100);
+        $this->setupSortControl($sort_columns, $query, array('@timestamp' => 'desc'));
+        $this->setupPaginationControl($query, 100);
 
         $this->getTabs()->add('search', array(
             'title' => $this->translate('Events'),
             'url'   => $this->view->url()
         ))->activate(('search'));;
-
-        $this->view->compact = $this->_getParam('view') === 'compact';
 
         $this->view->live = $this->params->shift('live');
         if ($this->view->live) {
@@ -92,28 +84,12 @@ class EventController extends Controller
         //if (! $this->view->show_ack)
         //    $search->setWithoutAck(true);
 
-        $limit = $this->_getParam('limit', 100);
-        $page = $this->_getParam('page', 1);
-        $query->limit($limit, $limit * ($page-1));
-
-        $this->view->limiter = new Limiter();
-        $this->view->limiter->setDefaultLimit(100);
-
-        $this->view->paginator = new Paginator();
-        $this->view->paginator->setQuery($query);
 
         $this->view->hits = $query->fetchAll();
 
         // TODO: reimplement
         //$this->view->warnings = $search->getIcingaWarningCount();
         //$this->view->criticals = $search->getIcingaCriticalCount();
-
-        // TODO: remove debug
-        //$this->view->filter_json = $search->getRenderedFilter();
-
-        if ($page > 1 and count($this->view->hits) == 0) {
-            $this->redirectNow($this->view->url()->without( 'page'));
-        }
     }
 
     public function showAction() {

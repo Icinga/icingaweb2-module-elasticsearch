@@ -1,8 +1,11 @@
 <?php if (! $this->compact): ?>
 <div class="controls">
     <?= $this->tabs ?>
-    <?= $this->limiter; ?>
     <?= $this->paginator; ?>
+    <div class="sort-controls-container">
+        <?= $this->limiter ?>
+        <?= $this->sortBox ?>
+    </div>
     <?= $this->filterEditor ?>
 </div>
 <?php endif ?>
@@ -43,6 +46,7 @@
     <table class="documents" data-base-target="_next">
         <?php if (! empty($this->fieldlist)): ?>
         <tr class="header">
+            <th>timestamp</th>
             <?php foreach($this->fieldlist as $field): ?>
             <th><?= $this->escape($field) ?></th>
             <?php endforeach ?>
@@ -60,6 +64,7 @@
                 $icons[] = $this->icon('ok', 'Acknowledged');
             }
             */
+            $timestamp = strtotime($hit->{'@timestamp'});
             $num = 0;
             $href = $this->url("elasticsearch/event/show", array('index' => $hit->_index, 'type' => $hit->_type, 'id' => $hit->_id));
         ?>
@@ -68,6 +73,7 @@
                 data-elastic-type="<?= $hit->_type ?>"
                 data-elastic-id="<?= $hit->_id ?>"
                 href="<?= $href ?>">
+                    <td title="<?= $this->formatDateTime($timestamp) ?>"><?= /* TODO: format time */ $this->timeAgo($timestamp) ?></td>
                 <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
                     <td><?php $value = (array_key_exists($field, $hit) ? $hit->{$field} : null);
                         if ($value === null) $value = '&nbsp;';
