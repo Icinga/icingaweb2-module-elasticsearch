@@ -10,19 +10,38 @@ input[type=text] {
   width: 30em;
 }
 
-table.documents {
+/* eventTable START */
+table.eventTable {
   border-collapse: separate;
   border-spacing: 2px;
 
+  th {
+    text-align: left;
+    white-space: nowrap;
+  }
   td, th {
     padding: 4px 5px;
   }
-  tr {
-    border-bottom: 2px solid transparent;
+  tbody {
+    tr.event > td:first-child {
+      border-left: 0.5em solid lightgrey;
+    }
+    tr.event:hover {
+      background-color: @tr-active-color;
+    }
+    td {
+      white-space: nowrap;
+    }
+    td.rawjson {
+      padding: 0;
+      font-size: 0.9em;
+      pre {
+        margin: 0;
+      }
+    }
+
   }
-  tr.state > td:first-child {
-    border-left: 0.5em solid lightgrey;
-  }
+  /* TODO: currently unused
   tr.warning > td:first-child {
     border-color: @colorWarning;
   }
@@ -35,21 +54,10 @@ table.documents {
   tr.critical.handled > td:first-child {
     border-color: @colorCriticalHandled ! important;
   }
-  tr.state a {
-    color: inherit;
-    text-decoration: none;
-  }
-  tr.state a:hover {
-    text-decoration: underline;
-  }
+  */
 
-  td {
-    white-space: nowrap;
-  }
-  td.rawjson {
-    font-size: 0.8em;
-  }
 }
+/* eventTable END */
 
 table.event_detail {
   td, th {

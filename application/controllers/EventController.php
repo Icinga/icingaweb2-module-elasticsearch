@@ -77,7 +77,7 @@ class EventController extends Controller
         //    $search->setWithoutAck(true);
 
 
-        $this->view->hits = $query->fetchAll();
+        $this->view->events = $query->fetchAll();
 
         // TODO: reimplement
         //$this->view->warnings = $search->getIcingaWarningCount();
@@ -249,13 +249,13 @@ class EventController extends Controller
         $this->view->paginator = new Paginator();
         $this->view->paginator->setQuery($query);
 
-        $this->view->hits = $query->fetchAll();
+        $this->view->events = $query->fetchAll();
         $this->view->count = $query->count();
         $this->view->took = $query->getTook();
         $this->view->warnings = $query->getIcingaWarningCount();
         $this->view->criticals = $query->getIcingaCriticalCount();
 
-        if ($page > 1 and count($this->view->hits) == 0) {
+        if ($page > 1 and count($this->view->events) == 0) {
             $this->redirectNow($this->view->url()->without( 'page'));
         }
 
