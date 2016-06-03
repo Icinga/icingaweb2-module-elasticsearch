@@ -13,6 +13,7 @@ class ConfigController extends Controller
 {
     public function indexAction()
     {
+        $this->assertPermission('config/modules');
         $this->redirectNow('elasticsearch/config/elasticsearch');
     }
 
@@ -21,6 +22,8 @@ class ConfigController extends Controller
      */
     public function elasticsearchAction()
     {
+        $this->assertPermission('config/modules');
+        
         $form = new ElasticsearchConfigForm();
         $form->setIniConfig($this->Config());
         $form->handleRequest();

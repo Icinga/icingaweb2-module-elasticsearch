@@ -24,6 +24,8 @@ class EventController extends Controller
 
     public function searchAction()
     {
+        $this->assertPermission('module/elasticsearch/search');
+
         $repository = EventBackend::fromConfig();
 
         if ($type = $this->getParam('type')) {
@@ -72,7 +74,9 @@ class EventController extends Controller
         //$this->view->criticals = $search->getIcingaCriticalCount();
     }
 
-    public function showAction() {
+    public function showAction()
+    {
+        $this->assertPermission('module/elasticsearch/search');
 
         $index = $this->_getParam('index');
         $type = $this->_getParam('type');
