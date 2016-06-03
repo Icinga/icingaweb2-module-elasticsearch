@@ -85,3 +85,29 @@ form.fieldSelector {
   }
 }
 /* FieldSelector END */
+
+/* AutoRefresher START */
+.auto-refresh-control {
+  display: inline-block;
+  margin: 0 1em;
+
+  > .control-group {
+    padding: 0;
+    // Note that the sort-control form does not have padding as it's utilizing different decorators
+
+    > .control-label-group {
+      text-align: left;
+      padding: 0;
+      width: 1.2em;
+    }
+
+    > select {
+      width: 4.5em;
+    }
+
+    > i {
+      .sr-only();
+    }
+  }
+}
+/* AutoRefresher END */

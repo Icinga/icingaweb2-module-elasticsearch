@@ -1,5 +1,5 @@
 <?php
-/* Icinga Web 2 | (c) 2015 Icinga Development Team | GPLv2+ */
+/* Elasticsearch for Icinga Web 2 | (c) 2016 Icinga Development Team | GPLv2+ */
 
 namespace Icinga\Module\Elasticsearch\Forms\Widget;
 

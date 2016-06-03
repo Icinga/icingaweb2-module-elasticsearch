@@ -36,23 +36,17 @@ class EventController extends Controller
         foreach ($query->getColumns() as $value) {
             $sort_columns[$value] = $value;
         }
-        $this->setupFilterControl($query, null, null, array('fields'));
+        $this->setupFilterControl($query, null, null, array('fields', 'refresh'));
         $this->setupLimitControl(100);
         $this->setupSortControl($sort_columns, $query, array('@timestamp' => 'desc'));
         $this->setupPaginationControl($query, 100);
         $this->setupFieldSelectorControl($query);
+        $this->setupAutoRefresherControl();
 
         $this->getTabs()->add('search', array(
             'title' => $this->translate('Events'),
             'url'   => $this->view->url()
         ))->activate(('search'));;
-
-        $this->view->live = $this->params->shift('live');
-        if ($this->view->live) {
-            $this->setAutorefreshInterval(1);
-        } else {
-            $this->setAutorefreshInterval(15);
-        }
 
         /* TODO: adapt to FilterEditor
         $this->view->show_ack = $this->_getParam('show_ack', 0);
@@ -68,14 +62,8 @@ class EventController extends Controller
         */
 
         // TODO: reimplement
-        //if (isset($fields))
-        //    $search->setFields($fields);
-
-
-        // TODO: reimplement
         //if (! $this->view->show_ack)
         //    $search->setWithoutAck(true);
-
 
         $this->view->events = $query->fetchAll();
 
