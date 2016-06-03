@@ -6,6 +6,7 @@
         <?= $this->limiter ?>
         <?= $this->sortBox ?>
     </div>
+    <?= $this->fieldSelector ?>
     <?= $this->filterEditor ?>
 </div>
 <?php endif ?>
@@ -44,11 +45,14 @@
     <?php else: ?>
 
     <table class="documents" data-base-target="_next">
-        <?php if (! empty($this->fieldlist)): ?>
+        <?php
+            $fieldList = $this->fieldSelector->getFields();
+            if (! empty($fieldList)):
+        ?>
         <tr class="header">
-            <th>timestamp</th>
-            <?php foreach($this->fieldlist as $field): ?>
-            <th><?= $this->escape($field) ?></th>
+            <th>&nbsp;</th>
+            <?php foreach($fieldList as $field): ?>
+            <th><?= $this->escape(ucwords(str_replace('_', ' ', strtolower($field)))) ?></th>
             <?php endforeach ?>
         </tr>
         <?php endif; ?>
@@ -74,7 +78,7 @@
                 data-elastic-id="<?= $hit->_id ?>"
                 href="<?= $href ?>">
                     <td title="<?= $this->formatDateTime($timestamp) ?>"><?= /* TODO: format time */ $this->timeAgo($timestamp) ?></td>
-                <?php if(count($this->fieldlist) > 0) foreach($this->fieldlist as $field): ?>
+                <?php if(count($fieldList) > 0) foreach($fieldList as $field): ?>
                     <td><?php $value = (array_key_exists($field, $hit) ? $hit->{$field} : null);
                         if ($value === null) $value = '&nbsp;';
                         else $value = $this->escape($value);
@@ -82,7 +86,7 @@
                         else: echo $value; endif ?></td>
                 <?php endforeach ?>
 
-                <?php if (count($this->fieldlist) == 0): ?>
+                <?php if (count($fieldList) == 0): ?>
                     <td class="rawjson"><pre><?= json_encode($hit, JSON_PRETTY_PRINT); ?></pre></td>
                 <?php endif ?>
             </tr>

@@ -12,8 +12,8 @@ use Icinga\Module\Elasticsearch\EventBackend;
 use Icinga\Module\Elasticsearch\Event;
 
 use Icinga\Module\Monitoring\Backend;
-use Icinga\Module\Monitoring\Object\Host;
-use Icinga\Module\Monitoring\Object\Service;
+//use Icinga\Module\Monitoring\Object\Host;
+//use Icinga\Module\Monitoring\Object\Service;
 
 class EventController extends Controller
 {
@@ -40,6 +40,7 @@ class EventController extends Controller
         $this->setupLimitControl(100);
         $this->setupSortControl($sort_columns, $query, array('@timestamp' => 'desc'));
         $this->setupPaginationControl($query, 100);
+        $this->setupFieldSelectorControl($query);
 
         $this->getTabs()->add('search', array(
             'title' => $this->translate('Events'),
@@ -51,13 +52,6 @@ class EventController extends Controller
             $this->setAutorefreshInterval(1);
         } else {
             $this->setAutorefreshInterval(15);
-        }
-
-        $fields = null;
-        $this->view->fields = $this->_getParam('fields');
-        $this->view->fieldlist = array();
-        if ($this->view->fields) {
-            $this->view->fieldlist = $fields = preg_split('/\s*[,]\s*/', $this->view->fields);
         }
 
         /* TODO: adapt to FilterEditor
