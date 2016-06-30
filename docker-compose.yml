@@ -1,4 +1,13 @@
 ---
+db:
+  image: mariadb
+  volumes:
+    - ./docker/data/mysql/db:/var/lib/mysql
+  environment:
+    MYSQL_ROOT_PASSWORD: onlyforadmin
+    MYSQL_DATABASE: icingaweb2
+    MYSQL_USER: icingaweb2
+    MYSQL_PASSWORD: rosebud
 elasticsearch:
   image: elasticsearch:2.3
   volumes:
@@ -27,8 +36,7 @@ logstash:
     - /etc/timezone:/etc/timezone:ro
   command: logstash -f /config/logstash-syslog.conf
 web:
-  #image: lazyfrosch/icingaweb2
-  build: docker/web/
+  image: lazyfrosch/icingaweb2:dev
   ports:
     - "8080:80"
   volumes:
@@ -36,3 +44,4 @@ web:
     - ".:/usr/share/icingaweb2/modules/elasticsearch"
   links:
     - elasticsearch
+    - db
