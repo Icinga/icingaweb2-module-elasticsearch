@@ -1,0 +1,26 @@
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<div class="content">
+    <h1><?= $this->translate('Monitored Event Types') ?><?
+        if ($this->configAdmin === true) {
+            echo ' '.$this->qlink($this->translate('Configure'), 'elasticsearch/types', null, array('class' => 'qlink'));
+        }
+    ?></h1>
+
+    <?php if (!empty($this->eventTypes)): ?>
+    <div class="tiles tile-container clearfix" data-base-target="_next">
+        <?php foreach($this->eventTypes as $type): ?>
+            <a href="<?= $this->url('elasticsearch/events', array('type' => $type->name)) ?>" class="tile">
+                <div class="tile-label"><?= $this->escape($type->label) ?></div>
+                <div class="tile-content"><?= $this->escape($type->description) ?></div>
+            </a>
+        <?php endforeach; ?>
+    </div>
+    <?php endif ?>
+
+<!--
+<h1><?= $this->translate('Elasticsearch Health') ?></h1>
+TODO: implement
+-->
+</div>

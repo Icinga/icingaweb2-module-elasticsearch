@@ -26,6 +26,15 @@ class Controller extends IcingaWebController
         $tabs = $this->getTabs();
 
         switch ($category) {
+            case 'main':
+                $tabs->add('overview', array(
+                    'title' => $this->translate('Elasticsearch Overview'),
+                    'url' => $this->view->url('elasticsearch')
+                ));
+                if ($active === null) {
+                    $active = 'overview';
+                }
+                break;
             case 'events':
                 if ($active === 'create') {
                     $tabs->add('create', array(

@@ -10,6 +10,14 @@ input[type=text] {
   width: 30em;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  a.qlink {
+    font-size: 0.8em;
+    color: @icinga-blue;
+    font-weight: normal;
+  }
+}
+
 /* eventTable START */
 table.eventTable {
   border-collapse: separate;
@@ -111,3 +119,42 @@ form.fieldSelector {
   }
 }
 /* AutoRefresher END */
+
+/* Tiles START */
+.tiles {
+  .tiles-container {
+    display: inline-block;
+    width: 100%;
+    margin: 2em;
+  }
+  a.tile:hover {
+    text-decoration: none;
+  }
+  .tile {
+    height: 10em;
+    width: 18em;
+
+    display: block;
+    float: left;
+
+    padding: 1em;
+    margin: 0.5em;
+
+    border-left: 3px solid #eee;
+    box-shadow: 5px 5px 5px #eee;
+  }
+  .tile:hover {
+    background-color: @tr-active-color;
+  }
+  .tile-label {
+    display: block;
+
+    font-weight: bold;
+    font-size: 1.2em;
+
+    margin-bottom: 0.5em;
+  }
+  .tile-content {
+  }
+}
+/* Tiles END */

@@ -4,11 +4,16 @@
 namespace Icinga\Module\Elasticsearch\Controllers;
 
 use Icinga\Module\Elasticsearch\Controller;
+use Icinga\Module\Elasticsearch\Repository\EventTypeRepository;
 
 class IndexController extends Controller
 {
     public function indexAction()
     {
-        $this->redirectNow('elasticsearch/event/search');
+        // TODO: has config permission
+        $this->view->configAdmin = true;
+        
+        $this->view->eventTypes = EventTypeRepository::loadAll();
+        $this->createTabs('main', 'overview');
     }
 }
