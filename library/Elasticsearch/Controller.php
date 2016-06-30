@@ -54,6 +54,11 @@ class Controller extends IcingaWebController
                     'url'   => $this->view->url('elasticsearch/types/edit', array('type' => $type)),
                 ));
                 break;
+            case 'event':
+                $tabs->add('show', array(
+                    'title' => $this->translate('Event details'),
+                ));
+                break;
             case 'types':
                 $tabs->add('index', array(
                     'title' => $this->translate('Event types'),

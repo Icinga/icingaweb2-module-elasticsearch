@@ -8,6 +8,8 @@
 
 $events = $this->events;
 $fields = $this->fields;
+/** @var Icinga\Web\Url $url */
+$url = $this->eventUrl;
 if (!$fields) {
     $fields = array();
 }
@@ -61,18 +63,18 @@ function getColumnValue($field, &$event, $maxlen=100) {
     */
     $timestamp = strtotime($event->{'@timestamp'});
     $num = 0;
-    $href = $this->url(
-        "elasticsearch/event/show",
-        array(
-            'index' => $event->_index,
-            'type' => $event->_type,
-            'id' => $event->_id
-        )
-    );
+    // add id to event show url
+    if ($url !== null) {
+        $href = clone $url;
+        $href->addParams(array(
+            'id' => $event->_id,
+        ));
+    }
+    else {
+        $href = '#';
+    }
 ?>
     <tr class="event state <?= join(' ', $classes) ?>"
-        data-elastic-index="<?= $event->_index ?>"
-        data-elastic-type="<?= $event->_type ?>"
         data-elastic-id="<?= $event->_id ?>"
         href="<?= $href ?>"
     >

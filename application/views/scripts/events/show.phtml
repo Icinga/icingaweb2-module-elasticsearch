@@ -6,18 +6,22 @@
 <div class="content">
 
     <?php if ($this->event === null): ?>
-        <p>Document not found!</p>
+        <p><?= $this->translate('Event not found!') ?></p>
     <?php else:
-        $document = $this->event->getDocument();
+        $document = $this->event->getAll();
     ?>
 
         <table class="event_detail">
             <tr>
-                <th>Index</th>
+                <th><?= $this->translate('Event type') ?></th>
+                <td><?= $this->qlink($this->eventType->getLabel(), 'elasticsearch/events', array('type' => $this->eventType->getName())) ?></td>
+            </tr>
+            <tr>
+                <th><?= $this->translate('Elasticsearch index') ?></th>
                 <td><?= $this->escape($this->event->getIndex()) ?></td>
             </tr>
             <tr>
-                <th>Type</th>
+                <th><?= $this->translate('Elasticsearch type') ?></th>
                 <td><?= $this->escape($this->event->getType()) ?></td>
             </tr>
             <tr>
@@ -26,17 +30,27 @@
             </tr>
             <tr>
                 <th>Timestamp</th>
-                <td><?= $this->escape($document->{'@timestamp'}) ?></td>
+                <td><?= $this->formatDateTime($timestamp = $this->event->getTimestamp()) ?> (<?= $this->timeAgo($timestamp) ?>)</td>
             </tr>
             <tr>
                 <td colspan="2">&nbsp;</td>
             </tr>
+            <?php if (($message = $this->event->get('message')) !== null): ?>
+                <tr>
+                    <th>Message</th>
+                    <td class="value"><?= $this->escape($message) ?></td>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+            <?php endif ?>
             <?php foreach($document as $key => $value):
-                if (substr($key, 0, 1) == '@' or $key == 'type') continue;
+                if ($key === 'message') continue;
+                if ($value === null) continue;
             ?>
             <tr>
                 <th><?= $this->escape($key) ?></th>
-                <td><?php
+                <td class="value"><?php
                     if (is_array($value)) {
                         echo '<pre>'.$this->escape(json_encode($value, JSON_PRETTY_PRINT)).'</pre>';
                         //echo $this->escape(implode(', ', $value));
@@ -52,6 +66,7 @@
             <?php endforeach ?>
         </table>
 
+        <?php /* TODO: re-implement
         <h4><?= $this->translate('Acknowledge') ?></h4>
         <form method="post" action="<?= $this->url("elasticsearch/event/ack") ?>">
             <label>Action</label>
@@ -71,6 +86,7 @@
             <input type="hidden" name="id" value="<?= $this->event->getId() ?>"/>
 
         </form>
+        */ ?>
 
     <?php endif ?>
 </div>

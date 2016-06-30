@@ -4,6 +4,7 @@
 namespace Icinga\Module\Elasticsearch\Controllers;
 
 use Icinga\Module\Elasticsearch\Controller;
+use Icinga\Module\Elasticsearch\Event;
 use Icinga\Module\Elasticsearch\Repository\EventTypeRepository;
 
 use Icinga\Exception\IcingaException;
@@ -45,6 +46,28 @@ class EventsController extends Controller
         $this->setupPaginationControl($query, 100);
         $this->setupAutoRefresherControl();
 
+        $this->view->eventUrl = $this->view->url('elasticsearch/events/show', array(
+            'type' => $type,
+        ));
+
         $this->view->events = $query;
+    }
+    
+    public function showAction()
+    {
+        $this->createTabs('event', 'show');
+
+        $type = $this->getParam('type');
+        if ($type === null) {
+            throw new IcingaException('You need to specify a type to show events from!');
+        }
+
+        $id = $this->getParam('id');
+        if ($id === null) {
+            throw new IcingaException('You need to specify the event id!');
+        }
+
+        $this->view->eventType = $eventType = EventTypeRepository::load($type);
+        $this->view->event = Event::fromRepository($eventType->getEventQuery(), $id);
     }
 }

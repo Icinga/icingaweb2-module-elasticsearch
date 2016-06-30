@@ -3,44 +3,85 @@
 namespace Icinga\Module\Elasticsearch;
 
 use Exception;
-use Icinga\Exception\IcingaException;
-use Icinga\Module\Elasticsearch\RestApi\RestApiClient;
+use Icinga\Repository\RepositoryQuery;
 
 /**
- * @todo reimplement?
+ * Retrieving and handling single events
  */
 class Event
 {
-    /** @var  RestApiClient */
-    protected $client;
+    /**
+     * The query to access events
+     * @var RepositoryQuery
+     */
+    protected $query;
 
+    /**
+     * Elasticsearch index
+     * @var string
+     */
     protected $index;
+
+    /**
+     * Elasticsearch document type
+     * @var string
+     */
     protected $type;
+
+    /**
+     * Elasticsearch document ID
+     * @var string
+     */
     protected $id;
 
-    protected $found = false;
+    /**
+     * UNIX timestamp
+     * @var int
+     */
+    protected $timestamp;
+
+    /**
+     * Elasticsearch document content
+     * @var \stdClass
+     */
     protected $document;
 
-    public function __construct(RestApiClient $client)
+    /**
+     * Load an Event from Elasticsearch using a RepositoryQuery
+     *
+     * Please specify all restrictions in the query, this will only
+     * filter by ID in addition.
+     *
+     * @param  RepositoryQuery $query  Query for the ElasticsearchRepository
+     * @param  string          $id     Elasticsearch document ID
+     *
+     * @return null|static
+     */
+    public static function fromRepository(RepositoryQuery $query, $id)
     {
-        $this->client = $client;
-    }
+        $self = new static;
 
-    public function fetch()
-    {
-        if (!$this->index or !$this->type or !$this->id)
-            throw new Exception("index, type and id must be set for fetching!");
+        $self->query = clone $query;
+        $self->query->where('_id', $id);
 
-        $result = $this->client->fetchDocument($this->index, $this->type, $this->id, array('_source'));
-
-        if ($result !== false) {
-            $this->document = $result;
-            return $this;
+        $document = $self->query->fetchRow();
+        if ($document === false) {
+            return null;
         }
-        else return false;
+
+        $self->document = $document;
+
+        $self->index = $document->_index;
+        $self->type = $document->_type;
+        $self->id = $document->_id;
+        $self->timestamp = strtotime($document->{'@timestamp'});
+
+        return $self;
     }
 
     /**
+     * Get the Elasticsearch index of the event
+     *
      * @return String
      */
     public function getIndex()
@@ -49,17 +90,8 @@ class Event
     }
 
     /**
-     * @param String $index
-     * @throws Exception
-     */
-    public function setIndex($index)
-    {
-        if (defined($this->index))
-            throw new Exception("Cannot change index!");
-        $this->index = $index;
-    }
-
-    /**
+     * Get the Elasticsearch type of the event
+     *
      * @return String
      */
     public function getType()
@@ -68,17 +100,8 @@ class Event
     }
 
     /**
-     * @param String $type
-     * @throws Exception
-     */
-    public function setType($type)
-    {
-        if (defined($this->type))
-            throw new Exception("Cannot change type!");
-        $this->type = $type;
-    }
-
-    /**
+     * Get the Elasticsearch ID of the event
+     *
      * @return String
      */
     public function getId()
@@ -87,20 +110,57 @@ class Event
     }
 
     /**
-     * @param String $id
-     * @throws Exception
+     * Get a single value from the Elasticsearch document
+     *
+     * @param  string  $key  Key in the Elasticsearch document
+     *
+     * @return null
      */
-    public function setId($id)
+    public function get($key)
     {
-        if (defined($this->id))
-            throw new Exception("Cannot change id!");
-        $this->id = $id;
+        if (property_exists($this->document, $key)) {
+            return $this->document->{$key};
+        }
+        else {
+            return null;
+        }
     }
 
     /**
-     * @return  object
+     * Get all data from the Elasticsearch document as an associative Array
+     *
+     * @return array
      */
-    public function getDocument()
+    public function getAll()
+    {
+        $data = array();
+        foreach ($this->document as $var => $value) {
+            $p = substr($var, 0, 1);
+            if ($var === 'type' || $p === '_' || $p === '@') {
+                continue;
+            }
+
+            $data[$var] = $value;
+        }
+        return $data;
+    }
+
+    /**
+     * Get the UNIX timestamp for the Event
+     *
+     * @return int
+     */
+    public function getTimestamp()
+    {
+        return $this->timestamp;
+    }
+
+    /**
+     * Return object to export as JSON
+     *
+     * @return \stdClass
+     */
+    public function getJSONObject()
     {
         return $this->document;
     }
@@ -110,6 +170,7 @@ class Event
      * @return $this
      * @throws Exception
      */
+    /* TODO: re-implement!
     public function update_partial(Array $data) {
         if ($this->document === null)
             throw new IcingaException("document must have been fetched before!");
@@ -127,4 +188,5 @@ class Event
         }
         else return false;
     }
+    */
 }
