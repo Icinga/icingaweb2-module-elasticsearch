@@ -1,0 +1,58 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<?php endif ?>
+<div class="content">
+    <h1><?= $this->translate('Event Types') ?></h1>
+
+    <?= $this->qlink(
+        $this->translate('Create a new event type') ,
+        'elasticsearch/types/create',
+        null,
+        array(
+            'class'             => 'button-link',
+            'data-base-target'  => '_next',
+            'icon'              => 'plus',
+            'title'             => $this->translate('Create a new event type')
+        )
+    ) ?>
+
+    <table class="table-row-selectable common-table" data-base-target="_next">
+        <thead>
+        <tr>
+            <th><?= $this->translate('Resource') ?></th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+    <?php foreach ($this->eventTypes as $name => $obj): ?>
+            <tr>
+                <td>
+                    <?= $this->qlink(
+                        $obj->label ?: $name,
+                        'elasticsearch/types/edit',
+                        array('type' => $name),
+                        array(
+                            'icon'  => 'edit',
+                            'title' => sprintf($this->translate('Edit event type %s'), $name)
+                        )
+                    ) ?>
+                </td>
+                <td class="icon-col text-right">
+                    <?= $this->qlink(
+                        '',
+                        'elasticsearch/types/remove',
+                        array('type' => $name),
+                        array(
+                            'class'   => 'action-link',
+                            'icon'    => 'cancel',
+                            'title'   => sprintf($this->translate('Remove event type %s'), $name)
+                        )
+                    ) ?>
+                </td>
+            </tr>
+        <?php endforeach ?>
+        </tbody>
+    </table>
+</div>

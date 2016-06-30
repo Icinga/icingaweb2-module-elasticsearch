@@ -1,0 +1,22 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+    <?= $this->paginator; ?>
+    <div class="sort-controls-container">
+        <?= $this->autorefresher ?>
+        <?= $this->limiter ?>
+        <?= $this->sortBox ?>
+    </div>
+    <?= $this->filterEditor ?>
+</div>
+<?php endif ?>
+<div class="content">
+    <h1><?= $this->title ?></h1>
+    <p><?= $this->description ?></p>
+
+    <?php if (empty($this->events)): ?>
+        <p><?= $this->translate('No events found!') ?></p>
+    <?php else: ?>
+        <?= $this->render('event/partial/eventTable.phtml') ?>
+    <?php endif ?>
+</div>
