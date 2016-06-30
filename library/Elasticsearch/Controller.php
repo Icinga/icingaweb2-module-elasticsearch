@@ -35,6 +35,11 @@ class Controller extends IcingaWebController
                     $active = 'overview';
                 }
                 break;
+            case 'search':
+                $tabs->add('search', array(
+                    'title' => $this->translate('Event search'),
+                ));
+                break;
             case 'events':
                 if ($active === 'create') {
                     $tabs->add('create', array(

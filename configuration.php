@@ -6,11 +6,12 @@ use Icinga\Application\Modules\Module;
 $this->providePermission('module/elasticsearch/search', $this->translate('Allow unrestricted access to query data in Elasticsearch'));
 
 $section = $this->menuSection('Elasticsearch')
-    ->setIcon('doc-text');
+    ->setIcon('doc-text')
+    ->setUrl('elasticsearch');
 
 $section->add(t('Event search'))
         ->setIcon('search')
-        ->setUrl('elasticsearch/event/search');
+        ->setUrl('elasticsearch/search');
 
 $this->provideConfigTab('elasticsearch', array(
     'title' => $this->translate('Configure Elasticsearch settings'),

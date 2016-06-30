@@ -15,7 +15,7 @@
     <?php if (property_exists($this, 'error')): ?>
         <h3><?= $this->error?></h3>
     <?php elseif (empty($this->events)): ?>
-        <p>No results found!</p>
+        <p><?= $this->translate('No events found!') ?></p>
     <?php else: ?>
         <?php $this->fields = $this->fieldSelector->getFields(); ?>
         <?= $this->render('event/partial/eventTable.phtml') ?>

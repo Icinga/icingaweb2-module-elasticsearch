@@ -12,10 +12,12 @@
     ?>
 
         <table class="event_detail">
+            <?php if ($this->eventType !== null): ?>
             <tr>
                 <th><?= $this->translate('Event type') ?></th>
                 <td><?= $this->qlink($this->eventType->getLabel(), 'elasticsearch/events', array('type' => $this->eventType->getName())) ?></td>
             </tr>
+            <?php endif; ?>
             <tr>
                 <th><?= $this->translate('Elasticsearch index') ?></th>
                 <td><?= $this->escape($this->event->getIndex()) ?></td>
