@@ -10,10 +10,13 @@ use Icinga\Module\Elasticsearch\EventBackend;
 
 class SearchController extends Controller
 {
+    public function init()
+    {
+        $this->assertPermission('elasticsearch/search');
+    }
+
     public function indexAction()
     {
-        $this->assertPermission('module/elasticsearch/search');
-        
         $this->createTabs('search', 'search');
 
         $repository = EventBackend::fromConfig();
@@ -38,8 +41,6 @@ class SearchController extends Controller
 
     public function showAction()
     {
-        $this->assertPermission('module/elasticsearch/search');
- 
         $this->createTabs('event', 'show');
 
         $id = $this->getParam('id');

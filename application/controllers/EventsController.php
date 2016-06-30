@@ -11,6 +11,11 @@ use Icinga\Exception\IcingaException;
 
 class EventsController extends Controller
 {
+    public function init()
+    {
+        $this->assertPermission('elasticsearch/events');
+    }
+
     public function indexAction()
     {
         $this->createTabs('events', 'list');
@@ -19,8 +24,7 @@ class EventsController extends Controller
         if ($type === null) {
             throw new IcingaException('You need to specify a type to list!');
         }
-
-        // TODO: control permissions
+        $this->assertEventType($type);
 
         $eventType = EventTypeRepository::load($type);
 
@@ -61,6 +65,7 @@ class EventsController extends Controller
         if ($type === null) {
             throw new IcingaException('You need to specify a type to show events from!');
         }
+        $this->assertEventType($type);
 
         $id = $this->getParam('id');
         if ($id === null) {

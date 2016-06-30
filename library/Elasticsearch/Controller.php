@@ -3,12 +3,15 @@
 
 namespace Icinga\Module\Elasticsearch;
 
-use Icinga\Exception\ProgrammingError;
+use Icinga\Data\Filter\Filter;
 use Icinga\Module\Elasticsearch\Web\Widget\AutoRefresher;
 use Icinga\Module\Elasticsearch\Web\Widget\FieldSelector;
 use Icinga\Repository\RepositoryQuery;
 use Icinga\Web\Controller as IcingaWebController;
 use Icinga\Web\Url;
+
+use Icinga\Exception\ProgrammingError;
+use Icinga\Security\SecurityException;
 
 class Controller extends IcingaWebController
 {
@@ -53,11 +56,12 @@ class Controller extends IcingaWebController
                     'title' => $this->translate('Events'),
                     'url'   => $this->view->url('elasticsearch/events', array('type' => $type)),
                 ));
-                // TODO: only when config is allowed
-                $tabs->add('edit', array(
-                    'title' => $this->translate('Edit type'),
-                    'url'   => $this->view->url('elasticsearch/types/edit', array('type' => $type)),
-                ));
+                if ($this->hasPermission('config/elasticsearch')) {
+                    $tabs->add('edit', array(
+                        'title' => $this->translate('Edit type'),
+                        'url'   => $this->view->url('elasticsearch/types/edit', array('type' => $type)),
+                    ));
+                }
                 break;
             case 'event':
                 $tabs->add('show', array(
@@ -128,5 +132,75 @@ class Controller extends IcingaWebController
         }
 
         return $this;
+    }
+
+    public function canEventTypes()
+    {
+        $types = array();
+        $restrictions = $this->getRestrictions('elasticsearch/events/allowed_types');
+
+        foreach ($restrictions as $restriction) {
+            $allowedTypes = preg_split('/\s*,\s*/', trim($restriction), -1, PREG_SPLIT_NO_EMPTY);
+            $types = array_merge($types, $allowedTypes);
+        }
+
+        return $types;
+    }
+
+    /**
+     * Check if current user can use an EventType
+     *
+     * @param  string  $type  the EventType name
+     *
+     * @return bool
+     */
+    public function canEventType($type)
+    {
+        $allowedTypes = $this->canEventTypes();
+
+        if (empty($allowedTypes)) {
+            return true;
+        }
+        elseif (in_array($type, $allowedTypes)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * Asserts that the current user can use an EventType
+     *
+     * @param  string  $type  the EventType name
+     *
+     * @throws SecurityException  When the EventType is not accessible
+     */
+    public function assertEventType($type)
+    {
+        if (! $this->canEventType($type)) {
+            throw new SecurityException('No permission for event type %s', $type);
+        }
+    }
+
+    /**
+     * Applies the name filter of EventType restrictions onto a Query
+     *
+     * @param RepositoryQuery $query
+     */
+    public function filterEventTypes(RepositoryQuery $query)
+    {
+        $allowedTypes = $this->canEventTypes();
+
+        if (! empty($allowedTypes)) {
+            $filter = Filter::matchAny();
+
+            foreach ($allowedTypes as $type) {
+                $here = Filter::where('name', $type);
+                $filter->addFilter($here);
+            }
+
+            $query->addFilter($filter);
+        }
     }
 }

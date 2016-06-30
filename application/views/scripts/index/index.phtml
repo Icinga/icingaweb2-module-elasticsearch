@@ -2,6 +2,7 @@
     <?= $this->tabs ?>
 </div>
 <div class="content">
+<?php if ($this->canTypes): ?>
     <h1><?= $this->translate('Monitored Event Types') ?><?
         if ($this->configAdmin === true) {
             echo ' '.$this->qlink($this->translate('Configure'), 'elasticsearch/types', null, array('class' => 'qlink'));
@@ -18,7 +19,7 @@
         <?php endforeach; ?>
     </div>
     <?php endif ?>
-
+<?php endif; ?>
 <!--
 <h1><?= $this->translate('Elasticsearch Health') ?></h1>
 TODO: implement

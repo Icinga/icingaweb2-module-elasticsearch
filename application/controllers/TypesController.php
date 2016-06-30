@@ -13,13 +13,14 @@ class TypesController extends Controller
 {
     public function init()
     {
-        // TODO: permission
+        $this->assertPermission('config/elasticsearch');
     }
 
     public function indexAction()
     {
         $this->createTabs('types', 'index');
-        $this->view->eventTypes = EventTypeRepository::loadAll();
+        $repository = new EventTypeRepository();
+        $this->view->eventTypes = $repository->select();
     }
 
     public function editAction()

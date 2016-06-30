@@ -45,17 +45,6 @@ class EventTypeRepository extends IniRepository
     }
 
     /**
-     * Shorthand to fetchAll
-     *
-     * @return array|null
-     */
-    public static function loadAll()
-    {
-        $self = new static();
-        return $self->select()->fetchAll();
-    }
-
-    /**
      * Shorthand to fetchRow by name of event type
      *
      * @param   $name  string  event type name
