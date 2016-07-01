@@ -9,9 +9,15 @@ $this->providePermission(
     'elasticsearch/search',
     $this->translate('Allow unrestricted access to query data in Elasticsearch')
 );
+
 $this->providePermission(
     'elasticsearch/events',
     $this->translate('Allow listing of events based on configured event types')
+);
+
+$this->providePermission(
+    'elasticsearch/host',
+    $this->translate('Allow listing of events for hosts')
 );
 
 $this->provideRestriction(

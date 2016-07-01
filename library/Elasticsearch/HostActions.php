@@ -10,11 +10,12 @@ class HostActions extends HostActionsHook
 {
     public function getActionsForHost(Host $host)
     {
-        return array();
-        /* TODO
-        return array(
-            'Syslog' => Url::fromPath('elasticsearch/event/search', array('host' => $host->host_name))
-        );
-        */
+        return $this->createNavigation(array(
+            mt('elasticsearch', 'Elasticsearch Events') => array(
+                'url'  => Url::fromPath('elasticsearch/host', array('host' => $host->getName())),
+                'icon' => 'doc-text',
+                'permission' => 'elasticsearch/host',
+            )
+        ));
     }
 }

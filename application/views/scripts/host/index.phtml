@@ -1,0 +1,30 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+    <div class="icinga-module module-monitoring">
+        <?= $this->partial('partials/object/host-header.phtml', 'monitoring', $this) ?>
+    </div>
+
+    <?= $this->paginator; ?>
+    <div class="sort-controls-container">
+        <?= $this->autorefresher ?>
+        <?= $this->limiter ?>
+        <?= $this->sortBox ?>
+    </div>
+    <?= $this->filterEditor ?>
+</div>
+<?php endif ?>
+<div class="content">
+<?php if ($this->eventType === null): ?>
+    <p><?= $this->translate('Please select a type!') ?></p>
+<?php else: ?>
+    <h1><?= $this->title ?></h1>
+    <p><?= $this->description ?></p>
+
+    <?php if (empty($this->events)): ?>
+        <p><?= $this->translate('No events found!') ?></p>
+    <?php else: ?>
+        <?= $this->render('events/partial/eventTable.phtml') ?>
+    <?php endif ?>
+<?php endif ?>
+</div>
