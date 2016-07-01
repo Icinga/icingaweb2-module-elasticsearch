@@ -18,6 +18,6 @@
         <p><?= $this->translate('No events found!') ?></p>
     <?php else: ?>
         <?php $this->fields = $this->fieldSelector->getFields(); ?>
-        <?= $this->render('event/partial/eventTable.phtml') ?>
+        <?= $this->render('events/partial/eventTable.phtml') ?>
     <?php endif ?>
 </div>
