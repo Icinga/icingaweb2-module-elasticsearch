@@ -6,6 +6,7 @@ namespace Icinga\Module\Elasticsearch;
 use Icinga\Data\Filter\Filter;
 
 use Icinga\Exception\IcingaException;
+use Icinga\Module\Elasticsearch\Repository\EventTypeRepository;
 use Icinga\Repository\RepositoryQuery;
 
 /**
@@ -52,6 +53,28 @@ class EventType
     public function __construct($name)
     {
         $this->$name = $name;
+    }
+
+    /**
+     * Load an EventType by its name
+     *
+     * @param   $name  string  event type name
+     *
+     * @return  EventType
+     */
+    public static function loadByName($name)
+    {
+        $repo = new EventTypeRepository();
+        $row = $repo->select()->where('name', $name)->fetchRow();
+
+        $type = new EventType($row->name);
+        $type
+            ->setLabel($row->label)
+            ->setDescription($row->description)
+            ->setFilter($row->filter)
+            ->setFields($row->fields);
+
+        return $type;
     }
 
     /**

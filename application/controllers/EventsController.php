@@ -5,7 +5,7 @@ namespace Icinga\Module\Elasticsearch\Controllers;
 
 use Icinga\Module\Elasticsearch\Controller;
 use Icinga\Module\Elasticsearch\Event;
-use Icinga\Module\Elasticsearch\Repository\EventTypeRepository;
+use Icinga\Module\Elasticsearch\EventType;
 
 use Icinga\Exception\IcingaException;
 
@@ -26,7 +26,7 @@ class EventsController extends Controller
         }
         $this->assertEventType($type);
 
-        $eventType = EventTypeRepository::load($type);
+        $eventType = EventType::loadByName($type);
 
         $this->view->title = $eventType->getLabel();
         $this->view->description = $eventType->getDescription();
@@ -72,7 +72,7 @@ class EventsController extends Controller
             throw new IcingaException('You need to specify the event id!');
         }
 
-        $this->view->eventType = $eventType = EventTypeRepository::load($type);
+        $this->view->eventType = $eventType = EventType::loadByName($type);
         $this->view->event = Event::fromRepository($eventType->getEventQuery(), $id);
     }
 

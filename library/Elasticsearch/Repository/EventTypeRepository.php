@@ -48,28 +48,6 @@ class EventTypeRepository extends IniRepository
     }
 
     /**
-     * Shorthand to fetchRow by name of event type
-     *
-     * @param   $name  string  event type name
-     *
-     * @return  EventType
-     */
-    public static function load($name)
-    {
-        $me = new static();
-        $row = $me->select()->where('name', $name)->fetchRow();
-        
-        $type = new EventType($row->name);
-        $type
-            ->setLabel($row->label)
-            ->setDescription($row->description)
-            ->setFilter($row->filter)
-            ->setFields($row->fields);
-        
-        return $type;
-    }
-
-    /**
      * Update the target with the given data and optionally limit the affected entries by using a filter
      *
      * @param   string  $target
