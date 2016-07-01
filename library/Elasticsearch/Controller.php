@@ -10,11 +10,30 @@ use Icinga\Repository\RepositoryQuery;
 use Icinga\Web\Controller as IcingaWebController;
 use Icinga\Web\Url;
 
+// TODO: what happens when monitoring is not loaded/installed ??
+use Icinga\Module\Monitoring\Backend;
+
 use Icinga\Exception\ProgrammingError;
 use Icinga\Security\SecurityException;
 
 class Controller extends IcingaWebController
 {
+    /**
+     * The backend used for this controller
+     *
+     * @var Backend
+     */
+    protected $monitoringBackend;
+
+    protected function monitoringBackend()
+    {
+        // TODO: include on demand, return null when monitoring is not enabled
+        if ($this->monitoringBackend !== null) {
+            return $this->monitoringBackend;
+        }
+        return $this->monitoringBackend = Backend::instance($this->_getParam('backend'));
+    }
+
     /**
      * Helper method to instanciate tabs
      *

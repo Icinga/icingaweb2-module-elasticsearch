@@ -40,6 +40,9 @@ class EventTypeRepository extends IniRepository
                 'description',
                 'filter',
                 'fields',
+                'hostmap_enabled',
+                'hostmap_elasticsearch_expression',
+                'hostmap_icinga_expression',
             )
         );
     }
