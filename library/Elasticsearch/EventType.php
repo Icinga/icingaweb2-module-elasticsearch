@@ -3,11 +3,17 @@
 
 namespace Icinga\Module\Elasticsearch;
 
+use Icinga\Application\Logger;
 use Icinga\Data\Filter\Filter;
 
 use Icinga\Exception\IcingaException;
+use Icinga\Exception\ProgrammingError;
+use Icinga\Module\Elasticsearch\Filter\FilterExpressions;
 use Icinga\Module\Elasticsearch\Repository\EventTypeRepository;
 use Icinga\Repository\RepositoryQuery;
+
+// TODO: dependency!
+use Icinga\Module\Monitoring\Object\Host;
 
 /**
  * EventType to help handling with types
@@ -49,6 +55,13 @@ class EventType
      */
     protected $fields;
 
+    protected $hostmapFilter;
+
+    /*
+    protected $hostmapElasticsearch;
+
+    protected $hostmapIcinga;
+    */
     
     public function __construct($name)
     {
@@ -72,7 +85,8 @@ class EventType
             ->setLabel($row->label)
             ->setDescription($row->description)
             ->setFilter($row->filter)
-            ->setFields($row->fields);
+            ->setFields($row->fields)
+            ->setHostmapFilter($row->hostmap_filter);
 
         return $type;
     }
@@ -193,4 +207,66 @@ class EventType
 
         return $query;
     }
+
+    /**
+     * Return a pre-filtered Query for events the host for this EventType
+     *
+     * @param  Host  $host  Icinga host object
+     *
+     * @return RepositoryQuery
+     *
+     * @throws ProgrammingError  When filter has not been set
+     */
+    public function getEventQueryForHost(Host $host)
+    {
+        $query = $this->getEventQuery();
+
+        if (($filter = $this->getHostmapFilter()) === null) {
+            throw new ProgrammingError('hostmap filter has not been set!');
+        }
+
+        $filterHandler = new FilterExpressions($filter);
+        $filterHandler->resolve($host);
+        $query->addFilter($filter);
+
+        Logger::debug('Applying host filter: %s', $filter->toQueryString());
+
+        return $query;
+    }
+
+    /**
+     * Return the current Hostmap Filter
+     *
+     * @return Filter|null
+     */
+    public function getHostmapFilter()
+    {
+        return $this->hostmapFilter;
+    }
+
+    /**
+     * Set the Hostmap Filter with a Filter or query string
+     *
+     * @param  string|Filter  $filter  The Filter or query string to set as Hostmap Filter
+     *
+     * @return $this
+     *
+     * @throws ProgrammingError        When the input is not a string or Filter
+     */
+    public function setHostmapFilter($filter)
+    {
+        if ($filter !== null) {
+            if (is_string($filter)) {
+                $this->hostmapFilter = Filter::fromQueryString($filter);
+            }
+            elseif ($filter instanceof Filter) {
+                $this->hostmapFilter = $filter;
+            }
+            else {
+                throw new ProgrammingError('hostmap filter must be a Filter or query string');
+            }
+        }
+        return $this;
+    }
+
 }

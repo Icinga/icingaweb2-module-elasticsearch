@@ -3,6 +3,7 @@
 
 namespace Icinga\Module\Elasticsearch\Controllers;
 
+use Icinga\Data\Filter\Filter;
 use Icinga\Exception\NotFoundError;
 use Icinga\Module\Elasticsearch\Controller;
 use Icinga\Module\Elasticsearch\Event;
@@ -20,7 +21,7 @@ class HostController extends Controller
         $this->assertPermission('elasticsearch/host');
     }
 
-    protected function buildTabs(Host $host, $type)
+    protected function buildTabs(Host $host, &$type)
     {
         $tabs = $this->getTabs();
 
@@ -33,9 +34,17 @@ class HostController extends Controller
 
         $eventTypes = new EventTypeRepository();
         $eventTypeQuery = $eventTypes->select();
+        // only get EventTypes that have a hostmap filter
+        $eventTypeQuery->addFilter(Filter::expression('hostmap_filter', '!=', ''));
+
         $this->filterEventTypes($eventTypeQuery);
 
+        $first = null;
         foreach ($eventTypeQuery as $eventType) {
+            if ($first === null) {
+                $first = $eventType;
+            }
+
             $tabs->add($eventType->name, array(
                 'title' => $eventType->label ?: $eventType->name,
                 'url' => $this->view->url('elasticsearch/host', array(
@@ -43,6 +52,10 @@ class HostController extends Controller
                     'type' => $eventType->name,
                 )),
             ));
+        }
+        // If no type has been chosen, the first type is selected
+        if ($type === null) {
+            $type = $first->name;
         }
         if ($tabs->get($type) !== null) {
             $tabs->activate($type);
@@ -52,7 +65,6 @@ class HostController extends Controller
 
     public function indexAction()
     {
-
         // load the host
         $this->view->object = $host = new Host($this->monitoringBackend(), $this->params->getRequired('host'));
         if ($host->fetch() === false) {
@@ -72,7 +84,7 @@ class HostController extends Controller
             $this->view->description = $eventType->getDescription();
             $this->view->fields = $eventType->getFields();
 
-            $query = $eventType->getEventQuery();
+            $query = $eventType->getEventQueryForHost($host);
 
             $sort_columns = array();
             foreach ($query->getColumns() as $value) {
@@ -90,7 +102,7 @@ class HostController extends Controller
             $this->setupPaginationControl($query, 100);
             $this->setupAutoRefresherControl();
 
-            $this->view->eventUrl = $this->view->url('elasticsearch/events/show', array(
+            $this->view->eventUrl = $this->view->url('elasticsearch/host/show', array(
                 'type' => $type,
             ));
 
@@ -113,8 +125,11 @@ class HostController extends Controller
             throw new IcingaException('You need to specify the event id!');
         }
 
+        // TODO: adapt to Hostmap Filter!
         $this->view->eventType = $eventType = EventType::loadByName($type);
         $this->view->event = Event::fromRepository($eventType->getEventQuery(), $id);
+
+        $this->render('events/show', null, true);
     }
 
     /* TODO: re-implement

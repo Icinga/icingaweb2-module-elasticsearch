@@ -100,62 +100,36 @@ class EventTypeForm extends RepositoryForm
      */
     protected function createHostmapElements(array $formData)
     {
-        $this->addElement('checkbox', 'hostmap_enabled', array(
-            'label' => $this->translate('Enable'),
-            'autosubmit' => true,
+        $this->addElement('text', 'hostmap_filter', array(
+            'label' => $this->translate('Elasticsearch filter'),
+        ));
+
+        // TODO: note in ZF < 1.12
+        // TODO: decor for backticks
+        $this->addElement('note', 'hostmap_filter_note', array(
+            'value' =>
+                $this->translate('The Elasticsearch filter can utilize a syntax like ${attribute} to access Icingaweb2 host attributes.').' '.
+                '<pre>logsource=${host_name}</pre>'.
+                $this->translate('In addition one can use some basic regex to manipulate the attribute. This is a similar syntax to bash.').' '.
+                '<pre>logsource=${host_name/\.example\.com/}</pre>'.
+                '<pre>${attribute/&lt;regex&gt;/&lt;replacement&gt;/&lt;options&gt;}</pre>',
+            'decorators' => array(
+                'ViewHelper',
+                array(
+                    'HtmlTag',
+                    array('tag' => 'p')
+                )
+            )
         ));
 
         $this->addDisplayGroup(
-            array('hostmap_enabled'),
-            'hostmap',
+            array('hostmap_filter', 'hostmap_filter_note'),
+            'hostmap_group',
             array(
-                'legend' => $this->translate('Match events to Icinga hosts'),
+                'legend' => $this->translate('Find events for Icinga hosts'),
                 'decorators' => array('FormElements', 'Fieldset'),
             )
         );
-
-        // Only when user select's Icinga host mapping
-        if (array_key_exists('hostmap_enabled', $formData) && $formData['hostmap_enabled'] == '1') {
-            // Elasticsearch elements
-            $elasticsearchFields = $this->eventRepository()->select()->getColumns();
-
-            $elasticsearchFields = array_filter($elasticsearchFields, function($val) {
-                $a = substr($val, 0, 1);
-                if ($a === '_' || $a === '@') {
-                    return false;
-                }
-                return true;
-            });
-
-            $this->createExpressionSelector($formData, 'elasticsearch', $elasticsearchFields, array(
-                'select' => array(
-                    'label' => $this->translate('Elasticsearch field'),
-                    'description' => $this->translate('Elasticsearch field which is used to map the host name'),
-                ),
-                'expression' => array(
-                    'label' => $this->translate('Elasticsearch expression'),
-                    'description' => $this->translate('Document attributes can be accessed via ${attribute}'),
-                ),
-            ));
-
-            // Icinga elements
-            $icingaFields = array(
-                'host_name',
-                'host_display_name',
-                'host_address',
-                'host_address6',
-            );
-            $this->createExpressionSelector($formData, 'icinga', $icingaFields, array(
-                'select' => array(
-                    'label' => $this->translate('Icinga field'),
-                    'description' => $this->translate('Icingaweb2 field which is used to map the host name'),
-                ),
-                'expression' => array(
-                    'label' => $this->translate('Icinga expression'),
-                    'description' => $this->translate('Icingaweb2 host attributes can be accessed via ${attribute} (e.g. ${host_address6} or a custom variable like ${_host_operatingsystem}'),
-                ),
-            ));
-        }
     }
 
     /**
@@ -308,8 +282,8 @@ class EventTypeForm extends RepositoryForm
      */
     public function onSuccess()
     {
-        $this->onSuccessExpressionSelector('elasticsearch');
-        $this->onSuccessExpressionSelector('icinga');
+//        $this->onSuccessExpressionSelector('elasticsearch');
+//        $this->onSuccessExpressionSelector('icinga');
 
         return parent::onSuccess();
     }
