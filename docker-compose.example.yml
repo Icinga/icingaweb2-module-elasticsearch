@@ -1,0 +1,115 @@
+---
+version: "2"
+services:
+  db:
+    image: mariadb
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: onlyforadmin
+      MYSQL_DATABASE: icingaweb2
+      MYSQL_USER: icingaweb2
+      MYSQL_PASSWORD: rosebud
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - elastic
+
+  # Note: Default user: elastic / changeme
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      #- "xpack.security.enabled=false"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.1
+    volumes:
+      - esdata2:/usr/share/elasticsearch/data
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
+      #- "xpack.security.enabled=false"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g
+    networks:
+      - elastic
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:5.4.1
+    #environment:
+    #  - XPACK_SECURITY_ENABLED=false
+    links:
+      - elasticsearch1:elasticsearch
+    ports:
+      - 5601:5601
+    networks:
+      - elastic
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:5.4.1
+    links:
+      - elasticsearch1:elasticsearch
+    ports:
+      - 1514:1514
+      - 1514:1514/udp
+    volumes:
+      - ./docker/logstash:/usr/share/logstash/pipeline:ro
+    networks:
+      - elastic
+
+  web:
+    image: lazyfrosch/icingaweb2:dev
+    ports:
+      - 8080:80
+    volumes:
+      - icingawebconfig:/etc/icingaweb2
+      - .:/usr/share/icingaweb2/modules/elasticsearch
+    links:
+      - elasticsearch1:elasticsearch
+      - db
+    environment:
+      DATABASE_HOST: db
+      DATABASE_NAME: icingaweb2
+      DATABASE_USER: icingaweb2
+      DATABASE_PASSWORD: rosebud
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USER: elastic
+      ELASTICSEARCH_PASSWORD: changeme
+      ADMIN_USER: icingaadmin
+      ADMIN_PASSWORD: icinga
+    entrypoint: /usr/share/icingaweb2/modules/elasticsearch/docker/custom_entrypoint.sh
+    command: apache2-foreground
+    networks:
+      - elastic
+
+volumes:
+  esdata1:
+    driver: local
+  esdata2:
+    driver: local
+  icingawebconfig:
+    driver: local
+  dbdata:
+    driver: local
+
+networks:
+  elastic:
