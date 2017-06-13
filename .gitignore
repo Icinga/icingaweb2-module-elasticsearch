@@ -1,4 +1,8 @@
+# Editors
 .idea/
 .*.sw[op]
+*~
 
-docker/data/
+# Docker
+/docker/data/
+/docker-compose.yml

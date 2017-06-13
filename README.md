@@ -4,38 +4,21 @@ Icingaweb2 Elasticsearch Integration
 This is a very early test module for Icingaweb2, offering Logstash Event integration.
 
 It is planned to have the following features:
+
 * Event search/display in the web interface
 * CLI check command for Icinga(2)
 * Integration into service details
 * Search configuration coming from icinga2 service.vars
+
+## Documentation
+
+Checkout the [doc](doc/) directory, or open the documentation in Icingaweb2.
 
 ## Disclaimer
 
 Be WARNED, this module is not yet tested against big Elasticsearch installations, it might cause problems there.
 
 Neither is this module currently supported by anyone, use at your own risk.
-
-## Development environment
-
-You can pull up a quick ELK test environment in Docker with the included [docker-compose File](docker-compose.yml).
-
-After firing that up you will have:
-
-* Elasticsearch [http://localhost:9200](http://localhost:9200)
-* Kibana Dashboard [http://localhost:5601](http://localhost:5601)
-* Logstash prepared for syslog (tcp and udp on port `1514`)
-* Icingaweb2 with this module [http://localhost:8080](http://localhost:8080)
-  (setup token: docker) (auto-http login as icingaadmin - please select external auth)
-
-You can fire syslogs to get actual data into ELK:
-
-**/etc/rsyslog.d/logstash-local.conf**
-
-    *.* @127.0.0.1:1514
-    
-Or manually:
-
-    logger -n 127.0.0.1 -
 
 ## About
 
