@@ -11,17 +11,27 @@ class ServiceActions extends ServiceActionsHook
 {
     public function getActionsForService(Service $service)
     {
+        $elements = array();
+
+        $elements[mt('elasticsearch', 'Elasticsearch Events')] = array(
+            'url'  => Url::fromPath('elasticsearch/host', array('host' => $service->getHost()->getName())),
+            'icon' => 'doc-text',
+            'permission' => 'elasticsearch/host',
+        );
+
+        /* TODO: re-implement
         if ($service->check_command == "logstash_events") {
             // TODO: add icon when Icingaweb2 supports it
             // <i class="icon-doc-text"></i>
-            return array(
-                mt('logstash', 'Logstash events') => Url::fromPath('elasticsearch/event/list', array(
-                        'host' => $service->getHost()->getName(),
-                        'service' => $service->getName()
-                    )
+            $elements[mt('logstash', 'Logstash events')] = array(
+             Url::fromPath('elasticsearch/event/list', array(
+                    'host' => $service->getHost()->getName(),
+                    'service' => $service->getName()
                 )
             );
         }
-        else return array();
+        */
+
+        return $this->createNavigation($elements);
     }
 }

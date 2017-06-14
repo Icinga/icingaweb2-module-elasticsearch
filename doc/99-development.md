@@ -49,6 +49,12 @@ Or manually:
 
     logger -n 127.0.0.1 -P 1514 -t elastictest "My test message"
 
+## IDO Data
+
+The Icinga IDO schema is installed by default, and the monitoring module enable.
+
+To add some demo data for the module, see `ido_data_example.sql`, and import it.
+
 ## References
 
 Documentation regarding ElasticStack in Docker (for development purposes here):

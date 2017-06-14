@@ -6,14 +6,6 @@
   color: @icinga-blue;
 }
 
-label {
-  width: 4em;
-}
-
-input[type=text] {
-  width: 30em;
-}
-
 h1, h2, h3, h4, h5, h6 {
   a.qlink {
     font-size: 0.8em;
@@ -21,6 +13,31 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
   }
 }
+
+/* form tuning START */
+form {
+  .control-label-group {
+    width: 13em;
+  }
+}
+/* form tuning END */
+
+/* fieldset START */
+form {
+  fieldset {
+    legend {
+      padding: 0 0.5em;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
+
+    width: 40em; // label + input + margin
+    margin-top: 2em;
+    //border-left: none;
+    //border-right: none;
+  }
+}
+/* fieldset END */
 
 /* eventTable START */
 table.eventTable {

@@ -5,7 +5,7 @@ namespace Icinga\Module\Elasticsearch\Controllers;
 
 use Icinga\Exception\IcingaException;
 use Icinga\Module\Elasticsearch\Controller;
-use Icinga\Module\Elasticsearch\Forms\EventTypeForm;
+use Icinga\Module\Elasticsearch\Forms\Types\EventTypeForm;
 use Icinga\Module\Elasticsearch\Repository\EventTypeRepository;
 use Icinga\Web\Url;
 
