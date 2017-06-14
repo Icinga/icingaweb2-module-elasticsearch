@@ -54,7 +54,7 @@ class HostController extends Controller
             ));
         }
         // If no type has been chosen, the first type is selected
-        if ($type === null) {
+        if ($type === null && $first !== null) {
             $type = $first->name;
         }
         if ($tabs->get($type) !== null) {
