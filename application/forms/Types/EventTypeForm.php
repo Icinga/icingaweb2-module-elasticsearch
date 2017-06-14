@@ -101,14 +101,14 @@ class EventTypeForm extends RepositoryForm
     protected function createHostmapElements(array $formData)
     {
         $this->addElement('text', 'hostmap_filter', array(
-            'label' => $this->translate('Elasticsearch filter'),
+            'label' => $this->translate('Host filter'),
         ));
 
         // TODO: note in ZF < 1.12
         // TODO: decor for backticks
         $this->addElement('note', 'hostmap_filter_note', array(
             'value' =>
-                $this->translate('The Elasticsearch filter can utilize a syntax like ${attribute} to access Icingaweb2 host attributes.').' '.
+                $this->translate('The host filter can utilize a syntax like ${attribute} to access Icingaweb2 host attributes.').' '.
                 '<pre>logsource=${host_name}</pre>'.
                 $this->translate('In addition one can use some basic regex to manipulate the attribute. This is a similar syntax to bash.').' '.
                 '<pre>logsource=${host_name/\.example\.com/}</pre>'.
