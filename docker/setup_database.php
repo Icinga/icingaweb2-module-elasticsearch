@@ -70,7 +70,7 @@ if ($adminUser && $adminPassword) {
     if (!$user) {
         printf("Creating user %s in database\n", $adminUser);
 
-        $hash = crypt($adminPassword, '$1$' . openssl_random_pseudo_bytes(12));
+        $hash = crypt($adminPassword, '$1$' . bin2hex(openssl_random_pseudo_bytes(12)));
 
         try {
             $stm = $dbh->prepare(
@@ -85,9 +85,9 @@ if ($adminUser && $adminPassword) {
         if (preg_match('/^\$1\$(.{12}).+/', $user['password_hash'], $m)) {
             $salt = $m[1];
         } else {
-            $salt = '$1$' . openssl_random_pseudo_bytes(12);
+            $salt = bin2hex(openssl_random_pseudo_bytes(12));
         }
-        $hash = crypt($adminPassword, $salt);
+        $hash = crypt($adminPassword, '$1$' . $salt);
 
         if ($user['password_hash'] !== $hash || $user['active'] !== '1') {
             printf("Updating password hash of user %s\n", $adminUser);
