@@ -88,7 +88,7 @@ class EventBackend extends ElasticsearchRepository
 
         // TODO: move this to log types #11636
         $resourceConfig = Config::module('elasticsearch')->getSection('elasticsearch');
-        $backend->setIndex($resourceConfig->get('logstash_pattern', 'logstash-*'));
+        $backend->setIndex($resourceConfig->get('index_pattern', 'logstash-*'));
         
         return $backend;
     }
