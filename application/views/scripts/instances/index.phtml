@@ -1,0 +1,50 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<?php endif ?>
+<div class="content">
+    <div class="actions">
+        <?= $this->qlink(
+            $this->translate('Create a New Instance') ,
+            'elasticsearch/instances/new',
+            null,
+            [
+                'class'             => 'button-link',
+                'data-base-target'  => '_next',
+                'icon'              => 'plus',
+                'title'             => $this->translate('Create a new instance')
+            ]
+        ) ?>
+    </div>
+    <?php /** @var \Icinga\Repository\RepositoryQuery $instances */ if (! $instances->hasResult()): ?>
+    <p><?= $this->translate('No instances found.') ?></p>
+    <?php else: ?>
+    <div class="grid">
+    <?php foreach ($instances as $instance): ?>
+        <div class="grid-item">
+            <h2 class="grid-item-header"><?= $this->escape($instance->name) ?></h2>
+            <dl>
+                <dt><?= $this->translate('Name') ?></dt>
+                <dd><?= $this->escape($instance->name) ?></dd>
+                <dt><?= $this->translate('URI') ?></dt>
+                <dd><?= $this->escape($instance->uri) ?></dd>
+            </dl>
+            <?= $this->qlink(
+                $this->translate('Update Instance') ,
+                'elasticsearch/instances/update',
+                [
+                    'instance'  => $instance->name
+                ],
+                [
+                    'class'             => 'button-link',
+                    'data-base-target'  => '_next',
+                    'icon'              => 'plus',
+                    'title'             => $this->translate('Update Instance')
+                ]
+            ) ?>
+        </div>
+    <?php endforeach ?>
+    </div>
+    <?php endif ?>
+</div>
