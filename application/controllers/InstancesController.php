@@ -6,6 +6,7 @@ namespace Icinga\Module\Elasticsearch\Controllers;
 use Icinga\Module\Elasticsearch\Controller;
 use Icinga\Module\Elasticsearch\Forms\InstanceConfigForm;
 use Icinga\Module\Elasticsearch\Instances;
+use Icinga\Web\Url;
 
 class InstancesController extends Controller
 {
@@ -17,6 +18,11 @@ class InstancesController extends Controller
     public function indexAction()
     {
         $this->setTitle($this->translate('Instances'));
+
+        $this->getTabs()->add(uniqid(), [
+            'label'     => $this->translate('Event Types'),
+            'url'       => Url::fromPath('elasticsearch/eventtypes')
+        ]);
 
         $this->view->instances = (new Instances())->select(['name', 'uri']);
     }

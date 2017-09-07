@@ -6,6 +6,7 @@ namespace Icinga\Module\Elasticsearch\Controllers;
 use Icinga\Module\Elasticsearch\Controller;
 use Icinga\Module\Elasticsearch\Eventtypes;
 use Icinga\Module\Elasticsearch\Forms\EventtypeConfigForm;
+use Icinga\Web\Url;
 
 class EventtypesController extends Controller
 {
@@ -16,6 +17,11 @@ class EventtypesController extends Controller
 
     public function indexAction()
     {
+        $this->getTabs()->add(uniqid(), [
+            'label'     => $this->translate('Instances'),
+            'url'       => Url::fromPath('elasticsearch/instances')
+        ]);
+
         $this->setTitle($this->translate('Event Types'));
 
         $this->view->eventtypes = (new Eventtypes())->select(['name', 'instance', 'index', 'filter', 'fields']);
