@@ -32,4 +32,18 @@ class Controller extends \Icinga\Web\Controller
 
         return $this;
     }
+
+    /**
+     * Set the title tab
+     *
+     * @param   string  $label
+     */
+    public function setTitle($label)
+    {
+        $this->getTabs()->add(uniqid(), [
+            'active'    => true,
+            'label'     => $label,
+            'url'       => $this->getRequest()->getUrl()
+        ]);
+    }
 }
