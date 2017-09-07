@@ -1,0 +1,56 @@
+<?php if (! $this->compact): ?>
+<div class="controls">
+    <?= $this->tabs ?>
+</div>
+<?php endif ?>
+<div class="content">
+    <div class="actions">
+        <?= $this->qlink(
+            $this->translate('Create a New Event Type') ,
+            'elasticsearch/eventtypes/new',
+            null,
+            [
+                'class'             => 'button-link',
+                'data-base-target'  => '_next',
+                'icon'              => 'plus',
+                'title'             => $this->translate('Create a new event type')
+            ]
+        ) ?>
+    </div>
+    <?php /** @var \Icinga\Repository\RepositoryQuery $eventtypes */ if (! $eventtypes->hasResult()): ?>
+    <p><?= $this->translate('No event types found.') ?></p>
+    <?php else: ?>
+    <div class="grid">
+    <?php foreach ($eventtypes as $eventtype): ?>
+        <div class="grid-item">
+            <h2 class="grid-item-header"><?= $this->escape($eventtype->name) ?></h2>
+            <dl>
+                <dt><?= $this->translate('Name') ?></dt>
+                <dd><?= $this->escape($eventtype->name) ?></dd>
+                <dt><?= $this->translate('Instance') ?></dt>
+                <dd><?= $this->escape($eventtype->instance) ?></dd>
+                <dt><?= $this->translate('Index') ?></dt>
+                <dd><?= $this->escape($eventtype->index) ?></dd>
+                <dt><?= $this->translate('Filter') ?></dt>
+                <dd><?= $this->escape($eventtype->filter) ?></dd>
+                <dt><?= $this->translate('Fields') ?></dt>
+                <dd><?= $this->escape($eventtype->fields) ?></dd>
+            </dl>
+            <?= $this->qlink(
+                $this->translate('Update Event Type') ,
+                'elasticsearch/eventtypes/update',
+                [
+                    'eventtype'  => $eventtype->name
+                ],
+                [
+                    'class'             => 'button-link',
+                    'data-base-target'  => '_next',
+                    'icon'              => 'plus',
+                    'title'             => $this->translate('Update event type')
+                ]
+            ) ?>
+        </div>
+    <?php endforeach ?>
+    </div>
+    <?php endif ?>
+</div>
