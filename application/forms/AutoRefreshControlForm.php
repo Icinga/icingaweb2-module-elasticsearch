@@ -1,14 +1,14 @@
 <?php
 /* Elasticsearch for Icinga Web 2 | (c) 2016 Icinga Development Team | GPLv2+ */
 
-namespace Icinga\Module\Elasticsearch\Forms\Widget;
+namespace Icinga\Module\Elasticsearch\Forms;
 
 use Icinga\Web\Form;
 
 /**
- * AutoRefresher control form
+ * Auto refresh control form
  */
-class AutoRefresherControlForm extends Form
+class AutoRefreshControlForm extends Form
 {
     /**
      * CSS class for the auto refresh control

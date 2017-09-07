@@ -1,15 +1,15 @@
 <?php
 /* Elasticsearch for Icinga Web 2 | (c) 2016 Icinga Development Team | GPLv2+ */
 
-namespace Icinga\Module\Elasticsearch\Web\Widget;
+namespace Icinga\Module\Elasticsearch\Web;
 
 use Icinga\Web\Widget\AbstractWidget;
-use Icinga\Module\Elasticsearch\Forms\Widget\AutoRefresherControlForm;
+use Icinga\Module\Elasticsearch\Forms\AutoRefreshControlForm;
 
 /**
  * AutoRefresher control widget
  */
-class AutoRefresher extends AbstractWidget
+class AutoRefreshControl extends AbstractWidget
 {
     /**
      * Default auto refresh interval for this instance
