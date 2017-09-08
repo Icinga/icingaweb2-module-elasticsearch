@@ -1,0 +1,32 @@
+<div class="controls">
+    <?= $tabs ?>
+    <div class="icinga-module module-monitoring">
+        <?= $this->partial('partials/object/host-header.phtml', 'monitoring', ['object' => $host]) ?>
+    </div>
+    <?= $eventtypeForm ?>
+    <?= $paginator ?>
+</div>
+<div class="content">
+<?php if (empty($events)): ?>
+    <p><?= $this->translate('No events found.') ?></p>
+</div>
+<?php return; endif ?>
+    <table class="events-table">
+        <thead>
+        <tr>
+            <?php foreach (array_keys($fields) as $field): ?>
+            <th><?= $this->escape($field) ?></th>
+            <?php endforeach ?>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($events as $event): ?>
+            <tr>
+                <?php foreach ($fields as $getter): ?>
+                    <td><?= $this->escape($getter($event['_source'])) ?></td>
+                <?php endforeach ?>
+            </tr>
+        <?php endforeach ?>
+        </tbody>
+    </table>
+</div>

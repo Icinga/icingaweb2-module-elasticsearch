@@ -60,8 +60,35 @@
 }
 
 .missing-configuration-error {
-  background-color:  @color-unknown;
+  background-color: @color-unknown;
   color: #fff;
   display: inline-block;
   padding: 1em;
+}
+
+.eventtype-control {
+  margin-bottom: 1em;
+
+  > .control-group {
+    padding: 0;
+
+    > .control-label-group {
+      text-align: left;
+      width: auto;
+    }
+
+    > i {
+      .sr-only();
+    }
+  }
+}
+
+.events-table {
+  border-collapse: separate;
+  border-spacing: 0 1px;
+  width: 100%;
+
+  > thead > tr > th {
+    text-align: left;
+  }
 }

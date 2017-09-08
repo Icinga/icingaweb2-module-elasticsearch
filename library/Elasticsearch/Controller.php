@@ -3,7 +3,9 @@
 
 namespace Icinga\Module\Elasticsearch;
 
+use Icinga\Data\Paginatable;
 use Icinga\Module\Elasticsearch\Forms\Widget\AutoRefresherControlForm;
+use Icinga\Web\Widget\Paginator;
 
 class Controller extends \Icinga\Web\Controller
 {
@@ -45,5 +47,21 @@ class Controller extends \Icinga\Web\Controller
             'label'     => $label,
             'url'       => $this->getRequest()->getUrl()
         ]);
+    }
+
+    public function paginate(Paginatable $paginatable, $itemsPerPage = 25, $pageNumber = 0)
+    {
+        $request = $this->getRequest();
+        $limit = $request->getParam('limit', $itemsPerPage);
+        $page = $request->getParam('page', $pageNumber);
+        $paginatable->limit($limit, $page > 0 ? ($page - 1) * $limit : 0);
+
+        if (! $this->view->compact) {
+            $paginator = new Paginator();
+            $paginator->setQuery($paginatable);
+            $this->view->paginator = $paginator;
+        }
+
+        return $this;
     }
 }
