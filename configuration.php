@@ -12,3 +12,15 @@ $this->provideRestriction(
     'elasticsearch/eventtypes',
     $this->translate('Restrict the event types the user may use')
 );
+
+$this->provideConfigTab('elasticsearch/instances', array(
+    'title' => $this->translate('Configure Elasticsearch Instances'),
+    'label' => $this->translate('Elasticsearch Instances'),
+    'url'   => 'instances'
+));
+
+$this->provideConfigTab('elasticsearch/eventtypes', array(
+    'title' => $this->translate('Configure Event Types'),
+    'label' => $this->translate('Event Types'),
+    'url'   => 'instances'
+));
