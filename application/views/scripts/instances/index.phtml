@@ -18,8 +18,24 @@
         ) ?>
     </div>
     <?php /** @var \Icinga\Repository\RepositoryQuery $instances */ if (! $instances->hasResult()): ?>
-    <p><?= $this->translate('No instances found.') ?></p>
+    <p class="missing-configuration-error"><?= $this->translate('No Elasticsearch instance configured yet. You have to configure an instance before creating event types.') ?></p>
     <?php else: ?>
+    <?php if ($noEventtypes): ?>
+    <p class="missing-configuration-error"><?= $this->translate('No event types configured yet. You have to configure event types in order to access data in Elasticsearch.') ?></p>
+    <div class="actions">
+        <?= $this->qlink(
+            $this->translate('Create a New Event Type') ,
+            'elasticsearch/eventtypes/new',
+            null,
+            [
+                'class'             => 'button-link',
+                'data-base-target'  => '_self',
+                'icon'              => 'plus',
+                'title'             => $this->translate('Create a new event type')
+            ]
+        ) ?>
+    </div>
+    <?php endif ?>
     <div class="grid">
     <?php foreach ($instances as $instance): ?>
         <div class="grid-item">

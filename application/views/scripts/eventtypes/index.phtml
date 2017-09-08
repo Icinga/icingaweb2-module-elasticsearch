@@ -4,6 +4,9 @@
 </div>
 <?php endif ?>
 <div class="content">
+    <?php /** @var \Icinga\Repository\RepositoryQuery $eventtypes */ if (! $eventtypes->hasResult()): ?>
+        <p class="missing-configuration-error"><?= $this->translate('No event types configured yet. You have to configure event types in order to access data in Elasticsearch.') ?></p>
+    <?php endif ?>
     <div class="actions">
         <?= $this->qlink(
             $this->translate('Create a New Event Type') ,
@@ -17,9 +20,7 @@
             ]
         ) ?>
     </div>
-    <?php /** @var \Icinga\Repository\RepositoryQuery $eventtypes */ if (! $eventtypes->hasResult()): ?>
-    <p><?= $this->translate('No event types found.') ?></p>
-    <?php else: ?>
+    <?php if ($eventtypes->hasResult()): ?>
     <div class="grid">
     <?php foreach ($eventtypes as $eventtype): ?>
         <div class="grid-item">

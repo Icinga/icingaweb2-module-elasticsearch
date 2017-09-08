@@ -4,6 +4,7 @@
 namespace Icinga\Module\Elasticsearch\Controllers;
 
 use Icinga\Module\Elasticsearch\Controller;
+use Icinga\Module\Elasticsearch\Eventtypes;
 use Icinga\Module\Elasticsearch\Forms\InstanceConfigForm;
 use Icinga\Module\Elasticsearch\Instances;
 use Icinga\Web\Url;
@@ -25,6 +26,7 @@ class InstancesController extends Controller
         ]);
 
         $this->view->instances = (new Instances())->select(['name', 'uri']);
+        $this->view->noEventtypes = ! (new Eventtypes())->select()->hasResult();
     }
 
     public function newAction()

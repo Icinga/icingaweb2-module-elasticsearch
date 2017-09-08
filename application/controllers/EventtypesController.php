@@ -6,6 +6,8 @@ namespace Icinga\Module\Elasticsearch\Controllers;
 use Icinga\Module\Elasticsearch\Controller;
 use Icinga\Module\Elasticsearch\Eventtypes;
 use Icinga\Module\Elasticsearch\Forms\EventtypeConfigForm;
+use Icinga\Module\Elasticsearch\Instances;
+use Icinga\Module\Eventdb\Event;
 use Icinga\Web\Url;
 
 class EventtypesController extends Controller
@@ -23,6 +25,12 @@ class EventtypesController extends Controller
         ]);
 
         $this->setTitle($this->translate('Event Types'));
+
+        if (! (new Instances())->select()->hasResult()) {
+            $this->_helper->viewRenderer->setRender('create-instance');
+
+            return;
+        }
 
         $this->view->eventtypes = (new Eventtypes())->select(['name', 'instance', 'index', 'filter', 'fields']);
     }
