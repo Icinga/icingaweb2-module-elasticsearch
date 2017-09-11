@@ -9,6 +9,7 @@ use Icinga\Data\Queryable;
 use Icinga\Util\Json;
 use iplx\Http\Client;
 use iplx\Http\Request;
+use iplx\Http\Uri;
 
 class Query implements Queryable, Paginatable
 {
@@ -101,11 +102,16 @@ class Query implements Queryable, Paginatable
     protected function execute()
     {
         if ($this->response === null) {
+            $config = $this->elastic->getConfig();
+
             $client = new Client();
+
+            $uri = (new Uri("{$config->uri}/{$this->index}/_search"))
+                ->withUserInfo($config->user, $config->password);
 
             $request = new Request(
                 'GET',
-                "{$this->elastic->getConfig()->uri}/{$this->index}/_search",
+                $uri,
                 ['Content-Type' => 'application/json'],
                 json_encode(array_filter([
                     '_source'   => array_merge(['@timestamp'], $this->fields),

@@ -81,6 +81,25 @@ class InstanceConfigForm extends RepositoryForm
                 'required'      => true
             )
         );
+
+        $this->addElement(
+            'text',
+            'user',
+            array(
+                'description'   => $this->translate('The user to use for authentication'),
+                'label'         => $this->translate('User')
+            )
+        );
+
+        $this->addElement(
+            'password',
+            'password',
+            array(
+                'description'       => $this->translate('The password to use for authentication'),
+                'label'             => $this->translate('Password'),
+                'renderPassword'    => true
+            )
+        );
     }
 
     protected function createInsertElements(array $formData)

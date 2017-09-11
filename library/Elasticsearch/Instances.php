@@ -18,7 +18,9 @@ class Instances extends IniRepository
     protected $queryColumns = [
         'instances' => [
             'name',
-            'uri'
+            'uri',
+            'user',
+            'password'
         ]
     ];
 }
