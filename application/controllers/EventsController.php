@@ -13,6 +13,7 @@ use Icinga\Module\Elasticsearch\Forms\EventtypeControlForm;
 use Icinga\Module\Elasticsearch\Instances;
 use Icinga\Module\Monitoring\Backend\MonitoringBackend;
 use Icinga\Module\Monitoring\Object\Host;
+use Icinga\Module\Monitoring\Object\Macro;
 use Icinga\Util\StringHelper;
 
 class EventsController extends Controller
@@ -85,9 +86,11 @@ class EventsController extends Controller
             $this->httpNotFound($this->translate('Instance for the event type not found'));
         }
 
-        $elasticFilter = new FilterRenderer(
-            Filter::fromQueryString(strtr($eventtype->filter, ['{host.name}' => $host->getName()]))
-        );
+        $filterString = preg_replace_callback('/\{([\w._]+)\}/', function ($match) use ($host) {
+            return Macro::resolveMacro($match[1], $host);
+        }, $eventtype->filter);
+
+        $elasticFilter = new FilterRenderer(Filter::fromQueryString($filterString));
 
         $query = (new Elastic($instance))
             ->select(StringHelper::trimSplit($eventtype->fields))
