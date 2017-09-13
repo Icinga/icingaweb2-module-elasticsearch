@@ -99,5 +99,7 @@ class EventsController extends Controller
         $this->view->host = $host;
         $this->view->events = $query->fetchAll();
         $this->view->fields = $query->getFields();
+
+        $this->setAutorefreshInterval(10);
     }
 }
