@@ -97,7 +97,7 @@ class EventtypeConfigForm extends RepositoryForm
             'text',
             'filter',
             array(
-                'description'   => $this->translate('Elasticsaerch filter in the Icinga Web 2 filter format'),
+                'description'   => $this->translate('Elasticsearch filter in the Icinga Web 2 filter format'),
                 'label'         => $this->translate('Filter'),
                 'required'      => true
             )

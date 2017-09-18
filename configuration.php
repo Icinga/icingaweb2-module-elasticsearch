@@ -5,7 +5,7 @@
 
 $this->providePermission(
     'elasticsearch/config',
-    $this->translate('Allow to configure Elasticsaerch instances and event types')
+    $this->translate('Allow to configure Elasticsearch instances and event types')
 );
 
 $this->provideRestriction(
