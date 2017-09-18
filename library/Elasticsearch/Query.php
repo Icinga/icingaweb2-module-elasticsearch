@@ -29,6 +29,8 @@ class Query implements Queryable, Paginatable
 
     protected $response;
 
+    protected $patch = [];
+
     public function __construct(Elastic $elastic, array $fields = [])
     {
         $this->elastic = $elastic;
@@ -113,13 +115,13 @@ class Query implements Queryable, Paginatable
                 'GET',
                 $uri,
                 ['Content-Type' => 'application/json'],
-                json_encode(array_filter([
+                json_encode(array_filter(array_merge([
                     '_source'   => array_merge(['@timestamp'], $this->fields),
                     'query'     => $this->filter,
                     'from'      => $this->getOffset(),
                     'size'      => $this->getLimit(),
                     'sort'      => ['@timestamp' => 'desc']
-                ]))
+                ], $this->patch), function ($part) { return $part !== null; }))
             );
 
             $response = Json::decode((string) $client->send($request)->getBody(), true);
@@ -156,5 +158,19 @@ class Query implements Queryable, Paginatable
         $this->execute();
 
         return $this->response['hits']['hits'];
+    }
+
+    public function patch(array $patch)
+    {
+        $this->patch = $patch;
+
+        return $this;
+    }
+
+    public function getResponse()
+    {
+        $this->execute();
+
+        return $this->response;
     }
 }
