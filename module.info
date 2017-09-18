@@ -1,4 +1,3 @@
 Module: elasticsearch
-Version: 0.0.1-test
+Version: 1.0.0
 Description: Elasticsearch Event Integration
- Still in early testing...
