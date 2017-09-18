@@ -22,5 +22,5 @@ $this->provideConfigTab('elasticsearch/instances', array(
 $this->provideConfigTab('elasticsearch/eventtypes', array(
     'title' => $this->translate('Configure Event Types'),
     'label' => $this->translate('Event Types'),
-    'url'   => 'instances'
+    'url'   => 'eventtypes'
 ));
