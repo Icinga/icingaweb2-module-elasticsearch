@@ -3,10 +3,11 @@
 ![Icinga Logo](https://www.icinga.com/wp-content/uploads/2014/06/icinga_logo.png)
 
 1. [About](#about)
-2. [License](#license)
-3. [Getting Started](#getting-started)
-4. [Documentation](#documentation)
-5. [Contributing](#contributing)
+2. [Requirements](#requirements)
+3. [License](#license)
+4. [Getting Started](#getting-started)
+5. [Documentation](#documentation)
+6. [Contributing](#contributing)
 
 ## About
 
@@ -16,6 +17,12 @@ The Elasticsearch Module for Icinga Web 2 integrates your [Elastic](https://www.
 allows you to display data collected by [Beats](https://www.elastic.co/products/beats),
 [Logstash](https://www.elastic.co/products/logstash) and any other source. After you've installed and configured the
 module, you can browse events via the host action **Elasticsearch Events**.
+
+## Requirements
+
+* Icinga Web 2 version 2.4.2+
+* PHP version 5.6.x or 7.x
+* php-curl
 
 ## License
 
