@@ -22,6 +22,19 @@ URI of the Elasticsearch instance.
 
 Credentials for authentication, if any.
 
+**Certificate Authority**
+
+The path of the file containing one or more certificates to verify the peer with or the path to the directory that holds
+multiple CA certificates.
+
+**Client Certificate**
+
+The path of the client certificate.
+
+**Client Private Key**
+
+The path of the client private key.
+
 ## Event Types
 
 Event types define how to access data in your Elasticsearch instances. Again, please use the web interface for

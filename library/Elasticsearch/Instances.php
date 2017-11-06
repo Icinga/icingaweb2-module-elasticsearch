@@ -20,7 +20,10 @@ class Instances extends IniRepository
             'name',
             'uri',
             'user',
-            'password'
+            'password',
+            'ca',
+            'client_certificate',
+            'client_private_key'
         ]
     ];
 }

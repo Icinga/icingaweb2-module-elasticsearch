@@ -100,6 +100,32 @@ class InstanceConfigForm extends RepositoryForm
                 'renderPassword'    => true
             )
         );
+        $this->addElement(
+            'text',
+            'ca',
+            array(
+                'description' => $this->translate(
+                    'The path of the file containing one or more certificates to verify the peer with or the path'
+                    . ' to the directory that holds multiple CA certificates'),
+                'label' => $this->translate('Certificate Authority')
+            )
+        );
+        $this->addElement(
+            'text',
+            'client_certificate',
+            array(
+                'description'   => $this->translate('The path of the client certificate'),
+                'label'         => $this->translate('Client Certificate')
+            )
+        );
+        $this->addElement(
+            'text',
+            'client_private_key',
+            array(
+                'description'   => $this->translate('The path of the client private key'),
+                'label'         => $this->translate('Client Private Key')
+            )
+        );
     }
 
     protected function createInsertElements(array $formData)

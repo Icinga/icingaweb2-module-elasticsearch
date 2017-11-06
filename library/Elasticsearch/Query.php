@@ -108,6 +108,26 @@ class Query implements Queryable, Paginatable
 
             $client = new Client();
 
+            $curl = [];
+
+            if (! empty($config->ca)) {
+                if (is_dir($config->ca)
+                    || (is_link($config->ca) && is_dir(readlink($config->ca)))
+                ) {
+                    $curl[CURLOPT_CAPATH] = $config->ca;
+                } else {
+                    $curl[CURLOPT_CAINFO] = $config->ca;
+                }
+            }
+
+            if (! empty($config->client_certificate)) {
+                $curl[CURLOPT_SSLCERT] = $config->client_certificate;
+            }
+
+            if (! empty($config->client_private_key)) {
+                $curl[CURLOPT_SSLCERT] = $config->client_private_key;
+            }
+
             $uri = (new Uri("{$config->uri}/{$this->index}/_search"))
                 ->withUserInfo($config->user, $config->password);
 
@@ -124,7 +144,7 @@ class Query implements Queryable, Paginatable
                 ], $this->patch), function ($part) { return $part !== null; }))
             );
 
-            $response = Json::decode((string) $client->send($request)->getBody(), true);
+            $response = Json::decode((string) $client->send($request, ['curl' => $curl])->getBody(), true);
 
             if (isset($response['error'])) {
                 throw new RuntimeException(
