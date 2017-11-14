@@ -84,8 +84,6 @@
 }
 
 .events-table {
-  border-collapse: separate;
-  border-spacing: 0 1px;
   width: 100%;
 
   > thead > tr > th {
@@ -94,5 +92,10 @@
 
   > tbody tr:nth-child(odd) {
     background-color: @gray-lightest;
+  }
+
+  > tbody td {
+    padding: 0.5em;
+    white-space: nowrap;
   }
 }

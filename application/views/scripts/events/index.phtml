@@ -22,9 +22,15 @@
         <tbody>
         <?php foreach ($events as $event): ?>
             <tr>
-                <?php foreach ($fields as $getter): ?>
-                    <td><?= $this->escape($getter($event['_source'])) ?></td>
-                <?php endforeach ?>
+            <?php foreach ($fields as $getter):
+                $column = $getter($event['_source']);
+                $ellipsis = $this->ellipsis($column, 100);
+                if ($column !== $ellipsis): ?>
+                <td title="<?= $this->escape($column) ?>"><?= $this->escape($ellipsis) ?></td>
+                <?php else: ?>
+                <td><?= $this->escape($column) ?></td>
+                <?php endif ?>
+            <?php endforeach ?>
             </tr>
         <?php endforeach ?>
         </tbody>
