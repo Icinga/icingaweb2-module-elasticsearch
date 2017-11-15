@@ -11,7 +11,7 @@
     <p><?= $this->translate('No events found.') ?></p>
 </div>
 <?php return; endif ?>
-    <table class="events-table">
+    <table class="events-table table-row-selectable" data-base-target="_next">
         <thead>
         <tr>
             <?php foreach (array_keys($fields) as $field): ?>
@@ -21,7 +21,7 @@
         </thead>
         <tbody>
         <?php foreach ($events as $event): ?>
-            <tr>
+            <tr href="<?= $documentsUri->with(array('index' => $event['_index'], 'type' => $event['_type'], 'id' => $event['_id'])) ?>">
             <?php foreach ($fields as $getter):
                 $column = $getter($event['_source']);
                 $ellipsis = $this->ellipsis($column, 100);

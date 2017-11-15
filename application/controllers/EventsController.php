@@ -15,6 +15,7 @@ use Icinga\Module\Monitoring\Backend\MonitoringBackend;
 use Icinga\Module\Monitoring\Object\Host;
 use Icinga\Module\Monitoring\Object\Macro;
 use Icinga\Util\StringHelper;
+use Icinga\Web\Url;
 
 class EventsController extends Controller
 {
@@ -99,9 +100,10 @@ class EventsController extends Controller
 
         $this->paginate($query);
 
-        $this->view->host = $host;
+        $this->view->documentsUri = Url::fromPath('elasticsearch/documents', array('instance' => $eventtype->instance));
         $this->view->events = $query->fetchAll();
         $this->view->fields = $query->getFields();
+        $this->view->host = $host;
 
         $this->setAutorefreshInterval(10);
     }

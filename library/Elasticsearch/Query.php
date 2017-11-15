@@ -193,4 +193,50 @@ class Query implements Queryable, Paginatable
 
         return $this->response;
     }
+
+    public function get($target)
+    {
+        $config = $this->elastic->getConfig();
+
+        $client = new Client();
+
+        $curl = [];
+
+        if (! empty($config->ca)) {
+            if (is_dir($config->ca)
+                || (is_link($config->ca) && is_dir(readlink($config->ca)))
+            ) {
+                $curl[CURLOPT_CAPATH] = $config->ca;
+            } else {
+                $curl[CURLOPT_CAINFO] = $config->ca;
+            }
+        }
+
+        if (! empty($config->client_certificate)) {
+            $curl[CURLOPT_SSLCERT] = $config->client_certificate;
+        }
+
+        if (! empty($config->client_private_key)) {
+            $curl[CURLOPT_SSLCERT] = $config->client_private_key;
+        }
+
+        $uri = (new Uri("{$config->uri}/{$target}"))
+            ->withUserInfo($config->user, $config->password);
+
+        $request = new Request(
+            'GET',
+            $uri,
+            ['Content-Type' => 'application/json']
+        );
+
+        $response = Json::decode((string) $client->send($request, ['curl' => $curl])->getBody(), true);
+
+        if (isset($response['error'])) {
+            throw new RuntimeException(
+                'Got error from Elasticsearch: '. $response['error']['type'] . ': ' . $response['error']['reason']
+            );
+        }
+
+        return $response;
+    }
 }

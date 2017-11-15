@@ -94,8 +94,45 @@
     background-color: @gray-lightest;
   }
 
-  > tbody td {
-    padding: 0.5em;
-    white-space: nowrap;
+  > tbody {
+    td {
+      padding: 0.5em;
+      white-space: nowrap;
+    }
+
+    tr {
+      border-left: 5px solid transparent;
+    }
+
+    tr[href].active {
+      background-color: @tr-active-color;
+      border-left-color: @icinga-blue;
+    }
+
+    tr[href]:hover {
+      background-color: @tr-hover-color;
+      cursor: pointer;
+    }
+  }
+}
+
+.document {
+  th {
+    text-align: left;
+  }
+
+  td, th {
+    padding: 0.5em 0 0 0;
+    vertical-align: top;
+  }
+
+  tr:first-child {
+    > td, th {
+      padding-top: 0;
+    }
+  }
+
+  th, .value {
+    padding-left: 1em;
   }
 }
