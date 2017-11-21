@@ -100,11 +100,11 @@ class EventsController extends Controller
 
         $this->paginate($query);
 
+        $this->setupAutorefreshControl(10);
+
         $this->view->documentsUri = Url::fromPath('elasticsearch/documents', array('instance' => $eventtype->instance));
         $this->view->events = $query->fetchAll();
         $this->view->fields = $query->getFields();
         $this->view->host = $host;
-
-        $this->setAutorefreshInterval(10);
     }
 }

@@ -8,7 +8,7 @@ use Icinga\Web\Form;
 /**
  * Auto refresh control form
  */
-class AutoRefreshControlForm extends Form
+class AutorefreshControlForm extends Form
 {
     /**
      * CSS class for the auto refresh control
@@ -18,11 +18,11 @@ class AutoRefreshControlForm extends Form
     const CSS_CLASS_AUTOREFRESH = 'auto-refresh-control';
 
     /**
-     * Default interval
+     * Auto-refresh interval
      *
      * @var int
      */
-    const DEFAULT_INTERVAL = 15;
+    protected $interval;
 
     /**
      * Selectable intervals
@@ -30,83 +30,75 @@ class AutoRefreshControlForm extends Form
      * @var int[]
      */
     public static $intervals = array(
-        15  => '15s',
-        30  => '30s',
-        60  => '1m',
-        120 => '2m',
-        300 => '5m'
+        1  => '1s',
+        10 => '10s',
+        30 => '30s',
+        60 => '1m'
     );
 
-    /**
-     * Default interval for this instance
-     *
-     * @var int|null
-     */
-    protected $defaultRefresh;
-
-    /**
-     * {@inheritdoc}
-     */
     public function init()
     {
         $this->setAttrib('class', static::CSS_CLASS_AUTOREFRESH);
     }
 
     /**
-     * Get the default inteval
+     * Get the auto-refresh interval
      *
-     * @return int
+     * @return  int
      */
-    public function getDefaultRefresh()
+    public function getInterval()
     {
-        return $this->defaultRefresh !== null ? $this->defaultRefresh : static::DEFAULT_INTERVAL;
+        return $this->interval;
     }
 
     /**
-     * Set the default interval
+     * Set the auto-refresh interval
      *
-     * @param   int $defaultRefresh
+     * @param   int $interval
      *
      * @return  $this
      */
-    public function setDefaultRefresh($defaultRefresh)
+    public function setInterval($interval)
     {
-        $this->defaultRefresh = (int) $defaultRefresh;
+        $this->interval = $interval;
+
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRedirectUrl()
     {
         return $this->getRequest()->getUrl()
             ->setParam('refresh', $this->getElement('refresh')->getValue());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function createElements(array $formData)
     {
+        $intervals = static::$intervals;
+
+        $value = $this->getInterval();
+
+        if (! isset($intervals[$value])) {
+            $intervals[$value] = "{$value}s";
+        }
+
         $this->addElement(
             'select',
             'refresh',
             array(
                 'autosubmit'    => true,
-                'escape'        => false,
                 'label'         => $this->getView()->icon('cw'),
-                'multiOptions'  => static::$intervals,
-                'value'         => $this->getRequest()->getUrl()->getParam('refresh', $this->getDefaultRefresh()),
+                'multiOptions'  => $intervals,
+                'value'         => $value
             )
         );
+
         $this->getElement('refresh')->getDecorator('label')->setOption('escape', false);
     }
 
     /**
-     * Auto refresh control is always successful
+     * Auto-refresh control is always successful
      *
-     * @return bool
+     * @return  bool
      */
     public function onSuccess()
     {

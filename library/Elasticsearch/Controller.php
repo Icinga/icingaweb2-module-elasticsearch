@@ -4,31 +4,29 @@
 namespace Icinga\Module\Elasticsearch;
 
 use Icinga\Data\Paginatable;
-use Icinga\Module\Elasticsearch\Forms\Widget\AutoRefresherControlForm;
 use Icinga\Web\Widget\Paginator;
 
 class Controller extends \Icinga\Web\Controller
 {
     /**
-     * Sets up the AutoRefresher Widget for the current view
+     * Set up the auto-refresh widget for the current view
      *
-     * @param    int    $defaultRefresh   Default auto-refresh interval
+     * @param    int    $interval   Default auto-refresh interval
      *
      * @return   $this
      */
-    public function setupAutoRefresherControl($defaultRefresh=null)
+    public function setupAutorefreshControl($interval)
     {
-        $widget = new AutoRefresherControlForm();
-        if ($defaultRefresh !== null) {
-            $widget->setDefaultRefresh($defaultRefresh);
-        }
+        $widget = new AutorefreshControlWidget();
 
         if (! $this->view->compact) {
-            $this->view->autorefresher = $widget;
+            $this->view->autorefreshControl = $widget;
         }
 
-        $interval = (int) $this->getRequest()->getParam('refresh', $widget->getDefaultRefresh());
+        $interval = (int) $this->getRequest()->getParam('refresh', $interval);
+
         if ($interval !== null && $interval > 0) {
+            $widget->setInterval($interval);
             $this->setAutorefreshInterval($interval);
         }
 
