@@ -18,6 +18,8 @@ allows you to display data collected by [Beats](https://www.elastic.co/products/
 [Logstash](https://www.elastic.co/products/logstash) and any other source. After you've installed and configured the
 module, you can browse events via the host action **Elasticsearch Events**.
 
+![Icinga Web 2 Module Elasticsearch](doc/res/screenshots/99-Overview.png)
+
 ## Requirements
 
 * Icinga Web 2 version 2.4.2+
