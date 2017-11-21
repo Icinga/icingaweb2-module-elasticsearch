@@ -34,8 +34,8 @@ General Public License Version 2, you will find a copy of this license in the
 
 ## Getting Started
 
-Please have a look at our [installation instructions](doc/01-Installation.md) and how to
-[configure](doc/02-Configuration.md) the module.
+Please have a look at our [installation instructions](doc/02-Installation.md) and how to
+[configure](doc/03-Configuration.md) the module.
 
 ## Documentation
 
