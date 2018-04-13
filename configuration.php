@@ -8,6 +8,11 @@ $this->providePermission(
     $this->translate('Allow to configure Elasticsearch instances and event types')
 );
 
+$this->providePermission(
+    'elasticsearch/events',
+    $this->translate('Allow access to view Elasticsearch events on a host')
+);
+
 $this->provideRestriction(
     'elasticsearch/eventtypes',
     $this->translate('Restrict the event types the user may use')
