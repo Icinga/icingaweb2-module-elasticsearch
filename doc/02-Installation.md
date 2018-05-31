@@ -9,7 +9,7 @@
 
 ## Installation
 As with any Icinga Web 2 module, installation is pretty straight-forward. You just have to drop the module into the
-`/usr/share/icingaweb2/mdouels/elasticsearch` directory. Please note that the directory name **must** be `elasticsearch`
+`/usr/share/icingaweb2/modules/elasticsearch` directory. Please note that the directory name **must** be `elasticsearch`
 and nothing else. If you want to use a different directory, make sure it is within the module path of Icinga Web 2.
 
 ```shell
@@ -23,5 +23,5 @@ icingacli module enable elasticsearch
 ```
 
 ## Configuration
-Before the Elasticsearch mdoule can display anything, you have to configure at least one instance and one event type.
+Before the Elasticsearch module can display anything, you have to configure at least one instance and one event type.
 Read the [Configuration](03-Configuration.md) section for details.
