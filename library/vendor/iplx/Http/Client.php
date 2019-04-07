@@ -177,7 +177,7 @@ class Client implements ClientInterface
             curl_getinfo($ch, CURLINFO_HTTP_CODE), $handle->responseHeaders, $handle->responseBody
         );
 
-        if (count($this->handles) >= self::MAX_HANDLES) {
+        if (is_array($this->handles) && count($this->handles) >= self::MAX_HANDLES) {
             curl_close($ch);
         } else {
             curl_reset($ch);
