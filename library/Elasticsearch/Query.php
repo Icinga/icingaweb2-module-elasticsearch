@@ -163,11 +163,25 @@ class Query implements Queryable, Paginatable
         $events = $this->response['hits']['hits'];
 
         $fields = [];
+        $dummyarr = [];
+        $sortedevent = [];
 
         if (! empty($events)) {
             $event = reset($events);
-
-            Elastic::extractFields($event['_source'], $fields);
+            $sourcedata=($event['_source']);
+            $sortedevent['@timestamp']=$sourcedata['@timestamp'];
+            foreach ($this->fields as $myfield) {
+                if ((strpos($myfield, '.') !== false)) {
+                    $strparts = explode(".", $myfield);
+                    $mynewfield=$strparts[0];
+                    $mynewfield2=$strparts[1];
+                    $dummyarr[$mynewfield2]="NULL";
+                    $sortedevent[$mynewfield]=$dummyarr;
+                    continue;
+                }
+                $sortedevent[$myfield]="NULL";
+            }
+            Elastic::extractFields($sortedevent, $fields);
         }
 
         return $fields;
