@@ -39,8 +39,11 @@ class Elastic implements Selectable
         foreach ($source as $key => $value) {
             if ($key === '@timestamp') {
                 $fields['@timestamp'] = function($event) {
-                    $value = new \DateTime($event['@timestamp']);
-                    return $value->format('Y-m-d H:i:s');
+                    $value = new \DateTime($event['@timestamp'], new \DateTimeZone('UTC'));
+                    $value = $value->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+                    $value = $value->format('Y-m-d H:i:s');
+
+                    return $value;
                 };
                 continue;
             }
