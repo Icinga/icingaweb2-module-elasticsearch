@@ -170,6 +170,17 @@ class Query implements Queryable, Paginatable
             Elastic::extractFields($event['_source'], $fields);
         }
 
+        // Sort random order fields received from ES based on the configured fields order
+        $sort = array_map(function ($field) {
+            return str_replace('.', '_', $field);
+        }, $this->fields);
+
+        array_unshift($sort, '@timestamp');
+
+        $sort = array_flip($sort);
+
+        $fields = array_replace($sort, $fields);
+
         return $fields;
     }
 
