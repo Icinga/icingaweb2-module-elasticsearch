@@ -58,7 +58,7 @@ This Logstash example is based on the configuration examples of the [Logstash do
 [Logstash]
 instance = "Elasticsearch"
 index = "logstash-*"
-filter = "syslog_hostname={host.name} AND type=syslog"
+filter = "syslog_hostname={host.name}&type=syslog"
 fields = "syslog_timestamp, syslog_program, syslog_message"
 ```
 
