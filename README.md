@@ -18,6 +18,9 @@ allows you to display data collected by [Beats](https://www.elastic.co/products/
 [Logstash](https://www.elastic.co/products/logstash) and any other source. After you've installed and configured the
 module, you can browse events via the host action **Elasticsearch Events**.
 
+It also brings a command for `icingacli`which can be used to query Elasticsearch for certain events. This command
+can be used to create Icinga 2 checks.
+
 ![Icinga Web 2 Module Elasticsearch](doc/res/screenshots/99-Overview.png)
 
 ## Requirements
@@ -36,6 +39,8 @@ General Public License Version 2, you will find a copy of this license in the
 
 Please have a look at our [installation instructions](doc/02-Installation.md) and how to
 [configure](doc/03-Configuration.md) the module.
+
+For running checks you can refer to the [checks](doc/04-Checks.md) chapter.
 
 ## Documentation
 
