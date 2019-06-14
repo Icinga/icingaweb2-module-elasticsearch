@@ -201,7 +201,7 @@ class FilterRenderer {
             // simple comparison via match
             if ($sign === '=' || $sign === '!=') {
                 return array(
-                    'match' => array(
+                    'match_phrase' => array(
                         $column => $value,
                     ),
                 );
