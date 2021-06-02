@@ -12,5 +12,5 @@ The following will check if there are more than 3 (warning) or 5 (critical) even
 * As a `filter` the check takes a filter in Icinga Web 2's filter syntax. These are comparisons of fields in Elasticsearch to values
 
 ```
-# icingacli elasticsearch check --instance elasticsearch --crit 5 --warn 3 --index logstash* --filter "beat.hostname=www.example.com AND severity=critical" --from -1h 
+# icingacli elasticsearch check --instance elasticsearch --crit 5 --warn 3 --index logstash* --filter "beat.hostname=www.example.com&severity=critical" --from -1h 
 ```
