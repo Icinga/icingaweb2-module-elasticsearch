@@ -1,4 +1,4 @@
-/* Icinga Web 2 Elasticsearch Module (c) 2017 Icinga Development Team | GPLv2+ */
+/* Icinga Web 2 Elasticsearch Module (c) 2021 Icinga GmbH | GPLv2+ */
 
 .auto-refresh-control {
   display: inline-block;
@@ -48,8 +48,8 @@
 }
 
 .grid-item-header {
-  background: #ef4f98;
-  color: white;
+  background: var(--icinga-secondary, @icinga-secondary);
+  color: var(--text-color, @text-color);
   display: flex;
   flex-direction: column;
   height: 3em;
@@ -61,8 +61,8 @@
 }
 
 .missing-configuration-error {
-  background-color: @color-unknown;
-  color: #fff;
+  background-color: var(--color-unknown, @color-unknown);
+  color: var(--text-color, @text-color);
   display: inline-block;
   padding: 1em;
 }
@@ -92,7 +92,7 @@
   }
 
   > tbody tr:nth-child(odd) {
-    background-color: @gray-lightest;
+    background-color: var(--gray-lightest, @gray-lightest);
   }
 
   > tbody {
@@ -106,12 +106,12 @@
     }
 
     tr[href].active {
-      background-color: @tr-active-color;
-      border-left-color: @icinga-blue;
+      background-color: var(--tr-active-color, @tr-active-color);
+      border-left-color: var(--icinga-blue, @icinga-blue);
     }
 
     tr[href]:hover {
-      background-color: @tr-hover-color;
+      background-color: var(--tr-hover-color, @tr-hover-color);
       cursor: pointer;
     }
   }
