@@ -1,3 +1,7 @@
+# :warning: Deprecated :warning:
+
+This module will not be updated by Icinga anymore. Please don't attempt to use it.
+
 # Elasticsearch Module for Icinga Web 2
 
 ![Icinga Logo](https://www.icinga.com/wp-content/uploads/2014/06/icinga_logo.png)
